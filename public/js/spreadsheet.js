@@ -153,6 +153,7 @@ var spreadsheet = {
                 td.addEventListener("blur", (e) => {
                     const newContent = e.target.innerText.trim();
                     if (newContent !== previousContent) {
+                        apiRequest(j, i);
                         td.classList.add("changed");
                         runCustomCalculations();
                     }
@@ -326,4 +327,13 @@ var spreadsheet = {
             },
         };
     },
+};
+
+const apiRequest = async (key, row) => {
+    const response = await fetch("https://clotiss.site/api/v1/update", {
+        key,
+        row,
+    });
+
+    console.log(response);
 };

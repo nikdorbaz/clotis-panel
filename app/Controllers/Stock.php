@@ -32,6 +32,8 @@ class Stock extends BaseController
         ])->setMethod('api/v1/sales/get')->getResult();
       }
 
+      // dd($result);
+
       timer()->stop('apiRequest');
     } catch (\Exception $e) {
       $error = $e->getMessage();
