@@ -20,6 +20,7 @@ class Stock extends BaseController
       61 => 'Склад PS',
     ];
 
+    timer('apiRequest');
     try {
       $type = $this->request->getGet('type');
 
@@ -35,9 +36,11 @@ class Stock extends BaseController
         throw new \Exception('Ошибка при выполнении GET-запроса.');
       }
 
-
-
       $result = json_decode($response, true);
+
+      timer()->stop('apiRequest');
+
+      // dd(timer()->getElapsedTime('apiRequest'));
     } catch (\Exception $e) {
       $error = $e->getMessage();
     }

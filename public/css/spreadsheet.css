@@ -2,14 +2,17 @@ table.spreadsheet {
     border-collapse: collapse;
     font-size: 10pt;
     font-family: sans-serif;
+    margin-bottom: 40px;
 }
 
 .spreadsheet td {
-    border: 1px solid #eee;
+    /* border: 1px solid var(--cell-border-color); */
+    box-shadow: inset 0 0 0 0.5px var(--cell-border-color);
     min-width: 60pt;
     height: 16pt;
     padding: 5px;
-    text-align: right;
+    text-align: center;
+    border: 0;
 }
 
 .spreadsheet td.selected {
@@ -35,22 +38,22 @@ table.spreadsheet thead th {
 }
 
 table.spreadsheet tr.fixed {
-    background-color: #d5e4e5;
+    background-color: var(--cell-bg-color);
     border: 0;
+    box-shadow: inset 0 0 0 0.5px var(--cell-border-color)
 }
 
 table.spreadsheet td.fixed-col {
-    background: #d5e4e5;
+    background: var(--cell-bg-color);
+    box-shadow: inset 0 0 0 0.5px var(--cell-border-color)
 }
 
 @media (max-width: 767px) {
     table.spreadsheet tr.fixed {
-        background-color: #d5e4e5;
         position: inherit !important
     }
 
     table.spreadsheet td.fixed-col {
-        background: #d5e4e5;
         position: inherit !important
     }
 }
@@ -80,7 +83,6 @@ table.spreadsheet td.fixed-col {
 }
 
 .filter-row th {
-    background-color: #2cb1b6;
     padding: 10px;
 }
 
@@ -101,10 +103,8 @@ td.changed {
 
 tr {
     border-collapse: collapse;
-    border: 0 !important;
 }
 
 tr.fixed>td {
     border-collapse: collapse;
-    border: 0 !important
 }

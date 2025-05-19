@@ -1,3 +1,8 @@
+<?php
+
+$type = gettype('type') ?? "ordini";
+
+?>
 <!DOCTYPE html>
 <html>
 
@@ -27,29 +32,76 @@
     <input type="text" id="data-table-input">
   </div>
   <div class="tabs">
-    <a href="?type=ordini" class="<?= ($_GET['type'] == 'ordini') ? 'active' : '' ?>">Ordini</a>
-    <a href="?type=spedizione" class="<?= ($_GET['type'] == 'spedizione') ? 'active' : '' ?>">Spedizione</a>
+    <a href="?type=ordini" class="<?= ($type == 'ordini') ? 'active' : '' ?>">Ordini</a>
+    <a href="?type=spedizione" class="<?= ($type == 'spedizione') ? 'active' : '' ?>">Spedizione</a>
   </div>
 
 </body>
 <script>
   const salesData = <?= json_encode($result ?? [], JSON_UNESCAPED_UNICODE) ?>;
   const headers = salesData[0];
-  const filterTypes = ['text', 'text', 'text'];
   const rows = salesData;
+
+  const filterTypes = ['text', 'text', 'text', null, null]; // фильтры по колонкам
+  const columnSumTargets = {
+    from: salesData[0].length - 2,
+    to: salesData[0].length - 1
+  };
 
   const div = document.getElementById("data-table");
   const inputElement = document.getElementById("data-table-input");
 
-  console.log(rows);
   const table = spreadsheet.createTable({
     rows: rows.length,
     columns: headers.length,
     textInputElement: inputElement,
+    headers,
     filterTypes,
     data: rows,
-    fixedRows: 2,
-    fixedCols: 5
+    fixedRows: 3,
+    fixedCols: 5,
+    computedColumns: [salesData[0].length - 1, salesData[0].length - 2],
+    custom: [{
+        targetType: 'row',
+        target: salesData[0].length - 2,
+        targetItems: {
+          from: 5,
+          to: salesData[0].length - 3
+        },
+        calculate: (values) => {
+          let total = 0;
+          values.forEach((value) => {
+            if (!value.includes("+ Booking")) {
+              const match = value.match(/[\d.,]+/);
+              const val = match ? parseFloat(match[0].replace(",", ".")) : NaN;
+              if (!isNaN(val)) total += val;
+            }
+          })
+          return total;
+        },
+      },
+      {
+        targetType: 'row',
+        target: salesData[0].length - 1,
+        targetItems: {
+          from: 5,
+          to: salesData[0].length - 2
+        },
+        calculate: (values, {
+          row
+        }) => {
+          let total = 0;
+          values.forEach((value) => {
+            if (value.includes("+ Booking")) {
+              const match = value.match(/[\d.,]+/);
+              const val = match ? parseFloat(match[0].replace(",", ".")) : NaN;
+              if (!isNaN(val)) total += val;
+            }
+          })
+          return total;
+        },
+      },
+    ],
   });
 
   div.appendChild(table.element);
@@ -78,9 +130,6 @@
   }
 
   .tabs a {
-    display: flex;
-    text-decoration: none;
-    color: #333;
     padding: 6px 12px;
     background: #e0e0e0;
     border-radius: 6px;
