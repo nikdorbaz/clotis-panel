@@ -2,6 +2,7 @@
 
 <div class="auth">
 
+
     <form class="form-content" method="POST" action="/auth">
         <h1 class="">Авторизация</h1>
         <p class="">Для продолжения, введите данные ниже</p>
@@ -21,6 +22,12 @@
         <div class="field-wrapper">
             <button class="btn btn-primary js__control--button" data-type="auth">Вход</button>
         </div>
+
+        <?php if (session()->getFlashdata('error')): ?>
+            <div class="alert alert-danger">
+                <?= esc(session()->getFlashdata('error')) ?>
+            </div>
+        <?php endif; ?>
     </form>
 </div>
 
