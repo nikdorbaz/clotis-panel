@@ -90,15 +90,13 @@ input[type="text"] {
     width: 100px;
 }
 
-
-th:nth-child(4),
-td:nth-child(4) {
-    display: none;
+td.focused {
+    background-color: orange;
+    color: #fff;
 }
 
 td.changed {
-    background-color: green;
-    color: #fff;
+    background-color: #b6d7a8;
 }
 
 tr {

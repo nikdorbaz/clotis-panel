@@ -45,6 +45,6 @@ class Stock extends BaseController
       $error = $e->getMessage();
     }
 
-    return view('stock', ['result' => $result, 'error' => $error, 'name' => $warehouses[$id]]);
+    return view('table/index', ['result' => $result, 'error' => $error, 'name' => $warehouses[$id], 'type' => $type]);
   }
 }

@@ -136,8 +136,12 @@ var spreadsheet = {
                 td.id = encodeCellId(tableId, i, j);
                 td.setAttribute("cellpadding", 0);
 
+                let previousContent = "";
+
                 td.addEventListener("focus", (e) => {
                     const el = e.target;
+                    previousContent = el.innerText.trim();
+
                     const range = document.createRange();
                     const sel = window.getSelection();
                     range.selectNodeContents(el);
@@ -146,9 +150,12 @@ var spreadsheet = {
                     sel.addRange(range);
                 });
 
-                td.addEventListener("input", () => {
-                    td.classList.add("changed");
-                    runCustomCalculations();
+                td.addEventListener("blur", (e) => {
+                    const newContent = e.target.innerText.trim();
+                    if (newContent !== previousContent) {
+                        td.classList.add("changed");
+                        runCustomCalculations();
+                    }
                 });
 
                 if (j < fixedCols) {
