@@ -29,4 +29,19 @@ class Services extends BaseService
      *     return new \CodeIgniter\Example();
      * }
      */
+
+    /**
+     * Возвращаем помощник апи
+     *
+     * @param boolean $getShared
+     * @return \App\Libraries\ApiHelper
+     */
+    public static function apiHelper($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('apiHelper');
+        }
+
+        return new \App\Libraries\ApiHelper;
+    }
 }

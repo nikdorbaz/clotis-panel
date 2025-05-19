@@ -22,21 +22,17 @@ class Stock extends BaseController
 
     timer('apiRequest');
     try {
-      $type = $this->request->getGet('type');
+      $type = $this->request->getGet('type') ?? "ordini";
 
       if ($type == 'spedizione') {
-        $url = 'https://clotiss.site/api/v1/sales/getSpedizione?id=' . $id;
+        $result = service('ApiHelper')->setParams([
+          'id' => $id
+        ])->setMethod('api/v1/sales/getSpedizione')->getResult();
       } else {
-        $url = 'https://clotiss.site/api/v1/sales/get?id=' . $id;
+        $result = service('ApiHelper')->setParams([
+          'id' => $id
+        ])->setMethod('api/v1/sales/get')->getResult();
       }
-
-      $response = file_get_contents($url);
-
-      if ($response === false) {
-        throw new \Exception('Ошибка при выполнении GET-запроса.');
-      }
-
-      $result = json_decode($response, true);
 
       timer()->stop('apiRequest');
 

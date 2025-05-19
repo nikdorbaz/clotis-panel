@@ -4,25 +4,26 @@ namespace App\Controllers;
 
 class Home extends BaseController
 {
-    public function index(): string
+    public function index()
     {
-        $result = null;
-        $error = null;
-
-        try {
-            $url = 'https://clotiss.site/api/v1/sales/get';
-
-            $response = file_get_contents($url);
-
-            if ($response === false) {
-                throw new \Exception('Ошибка при выполнении GET-запроса.');
-            }
-
-            $result = json_decode($response, true);
-        } catch (\Exception $e) {
-            $error = $e->getMessage();
+        if (session('user')) {
+            return redirect()->to('stock');
         }
 
-        return view('welcome_message', ['result' => $result, 'error' => $error]);
+        return view('auth');
+    }
+
+    public function auth()
+    {
+        try {
+            $result = service('ApiHelper')->setParams($this->request->getPost())
+                ->setMethod('api/v1/auth')
+                ->getResult();
+        } catch (\Throwable $e) {
+            dd($e->getMessage());
+        }
+
+
+        return redirect()->to('stock/64');
     }
 }
