@@ -12,23 +12,13 @@ class Stock extends BaseController
       return redirect()->to('/');
     }
 
-    dd(session('stock'));
-
     $result = null;
     $error = null;
-    $warehouses = [
-      64 => 'Склад CA',
-      54 => 'Склад DS/TL',
-      57 => 'Склад CL',
-      29 => 'Склад AX',
-      28 => 'Склад TR',
-      65 => 'Склад IN',
-      47 => 'Склад BB',
-      60 => 'Склад IT',
-      61 => 'Склад PS',
-    ];
 
     timer('apiRequest');
+
+    $id = $stock['id'];
+    $name = $stock['name'];
     try {
       $type = $this->request->getGet('type') ?? "ordini";
 
@@ -43,12 +33,10 @@ class Stock extends BaseController
       }
 
       timer()->stop('apiRequest');
-
-      // dd(timer()->getElapsedTime('apiRequest'));
     } catch (\Exception $e) {
       $error = $e->getMessage();
     }
 
-    return view('table/index', ['result' => $result, 'error' => $error, 'name' => $warehouses[$id], 'type' => $type]);
+    return view('table/index', ['result' => $result, 'error' => $error, 'name' => $name, 'type' => $type]);
   }
 }
