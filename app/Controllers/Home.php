@@ -19,6 +19,7 @@ class Home extends BaseController
             $result = service('ApiHelper')->setParams($this->request->getPost())
                 ->setMethod('api/v1/auth')
                 ->getResult();
+            dd($result);
         } catch (\Throwable $e) {
             dd($e->getMessage());
         }
