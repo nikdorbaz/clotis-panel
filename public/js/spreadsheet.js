@@ -330,10 +330,19 @@ var spreadsheet = {
 };
 
 const apiRequest = async (key, row) => {
-    const response = await fetch("https://clotiss.site/api/v1/update", {
-        key,
-        row,
-    });
+    // const response = await fetch("", {
+    //     key,
+    //     row,
+    // });
 
-    console.log(response);
+    let url = "https://clotiss.site/api/v1/update";
+    const xhr = new XMLHttpRequest();
+    const formData = new FormData();
+
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+
+    formData.append("key", key);
+    formData.append("row", row);
+    xhr.send(formData);
 };
