@@ -26,10 +26,10 @@ class Home extends BaseController
 
             if (!empty($response['result'])) {
                 // Пример: сохраняем в сессии stock ID (или другой нужный объект)
-                session()->set('stock', $response['result']);
+                session()->set('stock', $response['stock']);
 
                 // Можно редиректить на конкретный склад, если нужно
-                return redirect()->to('stock/' . $response['result']['id']);
+                return redirect()->to('stock/');
             }
 
             // Если result пустой — авторизация не удалась

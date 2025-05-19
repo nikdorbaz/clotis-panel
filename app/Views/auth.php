@@ -59,6 +59,10 @@
     .btn.btn-primary:hover {
         background-color: #0056b3;
     }
+
+    .field-wrapper input {
+        width: 100%;
+    }
 </style>
 
 <div class="auth">

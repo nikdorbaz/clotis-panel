@@ -4,8 +4,16 @@ namespace App\Controllers;
 
 class Stock extends BaseController
 {
-  public function index(int $id): string
+  public function index()
   {
+    $stock = session('stock');
+
+    if (is_null($stock)) {
+      return redirect()->to('/');
+    }
+
+    dd(session('stock'));
+
     $result = null;
     $error = null;
     $warehouses = [
