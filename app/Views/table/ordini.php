@@ -265,7 +265,7 @@ $clientsCount = count($clients);
   // Пример использования:
   window.addEventListener("load", () => {
 
-    if (window.innerWidth() > 767) {
+    if (window.innerWidth > 767) {
       applyStickyTable("ordini", 4, 6);
     }
     setupTotals("ordini", 2, 4, 3, 'size');
