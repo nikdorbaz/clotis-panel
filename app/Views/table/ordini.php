@@ -96,7 +96,7 @@ $clientsCount = count($clients);
             data-actually="<?= esc($actually) ?>"
             data-cell="true"
             class="<?= ($actually) ? "changed" : "" ?>"
-            contenteditable><?= esc($text) ?></td>
+            <?= empty($text) ? "" : "contenteditable" ?>><?= esc($text) ?></td>
         <?php endforeach; ?>
       </tr>
     <?php endforeach; ?>
@@ -111,87 +111,14 @@ $clientsCount = count($clients);
 </style>
 
 <script>
-  function applyStickyTable(tableId, fixedRow = 1, fixedCol = 1) {
-    const table = document.getElementById(tableId);
-    if (!table) return;
-
-    // === 1. Обрабатываем строки ===
-    let topOffset = 0;
-    const rows = table.querySelectorAll("tr");
-
-    for (let r = 0; r < fixedRow; r++) {
-      const row = rows[r];
-      if (!row) continue;
-
-      row.style.position = "sticky";
-      row.style.top = topOffset + "px";
-      row.style.zIndex = 6;
-      topOffset += row.offsetHeight;
-    }
-
-    // === 2. Обрабатываем колонки ===
-    const colLeft = [];
-
-    for (let c = 0; c < fixedCol; c++) {
-      let maxWidth = 0;
-      table.querySelectorAll("tr").forEach(row => {
-        let colIndex = 0;
-        for (let i = 0; i < row.children.length; i++) {
-          const cell = row.children[i];
-          const colspan = parseInt(cell.getAttribute("colspan")) || 1;
-
-          if (colspan > 1) {
-            colIndex += colspan;
-            continue;
-          }
-
-          if (colIndex === c) {
-            maxWidth = Math.max(maxWidth, cell.offsetWidth);
-            break;
-          }
-
-          colIndex += 1;
-        }
-      });
-
-      const left = c === 0 ? 0 : colLeft[c - 1] + colLeft[c - 1 + '_w'];
-      colLeft[c] = left;
-      colLeft[c + '_w'] = maxWidth;
-
-      table.querySelectorAll("tr").forEach(row => {
-        let colIndex = 0;
-        for (let i = 0; i < row.children.length; i++) {
-          const cell = row.children[i];
-          const colspan = parseInt(cell.getAttribute("colspan")) || 1;
-
-
-          if (!cell.classList.contains('fixed-col')) {
-            continue;
-          }
-
-          if (colspan > 1) {
-            colIndex += colspan;
-            cell.style.position = "sticky";
-            cell.style.left = 0 + "px";
-            cell.style.zIndex = 5;
-            continue;
-          }
-
-          if (colIndex === c) {
-            cell.style.position = "sticky";
-            cell.style.left = left + "px";
-            cell.style.zIndex = 5;
-            break;
-          }
-
-          colIndex += 1;
-        }
-      });
-    }
-  }
-
   // === Подсчёт Totale metri ordinati ===
-  function setupTotals(tableId, totalColIndex, startDataColIndex, startDataRowIndex = 0, type = '') {
+  function setupTotals(
+    tableId,
+    totalColIndex,
+    startDataColIndex,
+    startDataRowIndex = 0,
+    type = ""
+  ) {
     const table = document.getElementById(tableId);
     if (!table) return;
 
@@ -208,7 +135,7 @@ $clientsCount = count($clients);
         const cell = cells[i];
         let value = 0;
 
-        if (type === 'booking') {
+        if (type === "booking") {
           const match = cell.textContent.match(/\+\s*Booking\s*(\d+)/i);
           if (match) value = parseFloat(match[1]);
         } else {
@@ -230,8 +157,11 @@ $clientsCount = count($clients);
             const targetCell = cells[j];
             let val = 0;
 
-            if (type === 'booking') {
-              const m = targetCell.textContent.match(/\+\s*Booking\s*(\d+)/i);
+            if (type === "booking") {
+              const m =
+                targetCell.textContent.match(
+                  /\+\s*Booking\s*(\d+)/i
+                );
               if (m) val = parseFloat(m[1]);
             } else {
               val = parseFloat(targetCell.textContent);
@@ -245,15 +175,18 @@ $clientsCount = count($clients);
         cell.addEventListener("input", recalculateSum);
 
         // отслеживание изменений
-        let previousContent = '';
+        let previousContent = "";
         cell.addEventListener("focus", () => {
           previousContent = cell.innerText.trim();
         });
 
         cell.addEventListener("blur", () => {
           const newContent = cell.innerText.trim();
+
+          console.log(newContent, previousContent);
           if (newContent !== previousContent) {
             cell.classList.add("changed");
+            apiRequest(cell.dataset.product_id, cell.dataset.client_id, newContent);
           }
           recalculateSum();
         });
@@ -261,14 +194,27 @@ $clientsCount = count($clients);
     });
   }
 
+  const apiRequest = async (product_id, client_id, value) => {
+    let url = "https://clotiss.site/api/v1/update";
+    const xhr = new XMLHttpRequest();
+    const formData = new FormData();
+
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+
+    formData.append("product_id", product_id);
+    formData.append("client_id", client_id);
+    formData.append("value", value);
+
+    xhr.send(formData);
+  };
 
   // Пример использования:
   window.addEventListener("load", () => {
-
     if (window.innerWidth > 767) {
       applyStickyTable("ordini", 4, 6);
     }
-    setupTotals("ordini", 2, 4, 3, 'size');
-    setupTotals("ordini", 3, 4, 3, 'booking');
+    setupTotals("ordini", 2, 4, 3, "size");
+    setupTotals("ordini", 3, 4, 3, "booking");
   });
 </script>

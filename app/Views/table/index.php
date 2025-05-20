@@ -1,7 +1,6 @@
 <?= view('header') ?>
 
 <body class="table">
-  <h1><?= date('d-m-Y') ?></h1>
 
   <div class="table-wrapper">
     <?= view("table/$type") ?>

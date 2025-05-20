@@ -25,18 +25,12 @@ class Stock extends BaseController
       if ($type == 'spedizione') {
         $result = service('ApiHelper')->setParams([
           'id' => $id
-        ])->setMethod('api/v1/sales/getSpedizione')->getResult();
+        ])->setMethod('api/v1/stock/getSpedizione')->getResult();
       } elseif ($type == 'ordini') {
         $result = service('ApiHelper')->setParams([
           'id' => $id
         ])->setMethod('api/v1/stock/getOrdini')->getResult();
-      } else {
-        $result = service('ApiHelper')->setParams([
-          'id'  => $id,
-        ])->setMethod('api/v1/stock/getOrdini')->getResult();
       }
-
-      // dd($result);
 
       timer()->stop('apiRequest');
     } catch (\Exception $e) {
