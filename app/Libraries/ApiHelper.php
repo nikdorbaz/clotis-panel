@@ -15,6 +15,7 @@ class ApiHelper
     $this->client = Services::curlrequest([
       'baseURI' => $this->url,
       'http_errors' => false,
+      'timeout' => 5,
     ]);
   }
 

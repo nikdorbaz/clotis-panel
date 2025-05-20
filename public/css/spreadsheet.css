@@ -1,3 +1,8 @@
+.table-wrapper {
+    overflow: auto;
+    max-height: calc(100vh - 40px);
+}
+
 table.spreadsheet {
     border-collapse: collapse;
     font-size: 10pt;
@@ -37,6 +42,7 @@ table.spreadsheet thead th {
     z-index: 2;
 }
 
+table.spreadsheet .fixed-row,
 table.spreadsheet tr.fixed {
     background-color: var(--cell-bg-color);
     border: 0;
@@ -82,7 +88,7 @@ table.spreadsheet td.fixed-col {
     background-color: #555;
 }
 
-.filter-row th {
+.fixed-row th {
     padding: 10px;
 }
 
@@ -103,6 +109,7 @@ tr {
     border-collapse: collapse;
 }
 
+tr.fixed-row>td,
 tr.fixed>td {
     border-collapse: collapse;
 }

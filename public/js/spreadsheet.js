@@ -153,7 +153,9 @@ var spreadsheet = {
                 td.addEventListener("blur", (e) => {
                     const newContent = e.target.innerText.trim();
                     if (newContent !== previousContent) {
+                        console.log(tr.innerText);
                         apiRequest(j, i);
+
                         td.classList.add("changed");
                         runCustomCalculations();
                     }
