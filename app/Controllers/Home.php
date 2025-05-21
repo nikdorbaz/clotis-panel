@@ -49,4 +49,11 @@ class Home extends BaseController
             return redirect()->back()->with('error', 'Произошла ошибка при входе');
         }
     }
+
+    public function logout()
+    {
+        session()->destroy(); // Удаляет всю сессию
+
+        return redirect()->to('')->with('success', 'Вы вышли из системы');
+    }
 }
