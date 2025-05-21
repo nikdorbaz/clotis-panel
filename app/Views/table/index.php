@@ -1,4 +1,6 @@
-<?= view('header') ?>
+<?= view('styles') ?>
+
+<?= view('table/header') ?>
 
 <body class="table">
 

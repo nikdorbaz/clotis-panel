@@ -13,15 +13,6 @@ $clientsCount = count($clients);
 ?>
 
 <table class="spreadsheet" id="ordini">
-  <thead>
-    <tr class="fixed-row">
-      <th class="fixed-col"><input type="text" placeholder="Поиск..." data-col-index="0"></th>
-      <th class="fixed-col"><input type="text" placeholder="Поиск..." data-col-index="1"></th>
-      <th class="fixed-col"></th>
-      <th class="fixed-col"></th>
-      <th colspan="<?= $clientsCount ?>"></th>
-    </tr>
-  </thead>
   <tbody>
     <tr class="fixed-row">
       <td class="fixed-col"></td>
@@ -36,7 +27,7 @@ $clientsCount = count($clients);
     </tr>
     <tr class="fixed-row">
       <td class="fixed-col"></td>
-      <td class="fixed-col"></td>
+      <td class="fixed-col"><input type="text" placeholder="Поиск..." data-col-index="1"></td>
       <td class="fixed-col"></td>
       <td class="fixed-col"></td>
       <td class="fixed-col"></td>
@@ -212,7 +203,7 @@ $clientsCount = count($clients);
   // Пример использования:
   window.addEventListener("load", () => {
     if (window.innerWidth > 767) {
-      applyStickyTable("ordini", 4, 6);
+      applyStickyTable("ordini", 3, 6);
     }
     setupTotals("ordini", 2, 4, 3, "size");
     setupTotals("ordini", 3, 4, 3, "booking");

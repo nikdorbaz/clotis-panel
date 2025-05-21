@@ -39,4 +39,16 @@ class Stock extends BaseController
 
     return view('table/index', ['result' => $result, 'error' => $error, 'name' => $name, 'type' => $type]);
   }
+
+  public function history($month)
+  {
+    try {
+      $backupContent = file_get_contents(WRITEPATH . "backups/$month-ordini.json");
+      $result = json_decode($backupContent, true);
+    } catch (\Exception $e) {
+      return redirect()->to('stock');
+    }
+
+    return view('table/index', ['result' => $result, 'name' => $name ?? "", 'type' => 'ordini']);
+  }
 }

@@ -1,4 +1,4 @@
-<?= view('header'); ?>
+<?= view('styles'); ?>
 
 <style>
     .auth {
@@ -34,6 +34,10 @@
         border-radius: 5px;
         margin-bottom: 20px;
         font-size: 14px;
+    }
+
+    .alert-success {
+        background-color: chartreuse;
     }
 
     .form-control {
@@ -91,6 +95,12 @@
         <?php if (session()->getFlashdata('error')): ?>
             <div class="alert alert-danger">
                 <?= esc(session()->getFlashdata('error')) ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if (session()->getFlashdata('success')): ?>
+            <div class="alert alert-success">
+                <?= esc(session()->getFlashdata('success')) ?>
             </div>
         <?php endif; ?>
     </form>

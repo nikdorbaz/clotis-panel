@@ -19,10 +19,9 @@ class Manager extends BaseController
     $id = $manager['id'];
     $name = $manager['name'];
     try {
-
-      // $result = service('ApiHelper')->setParams([
-      //   'id' => $id
-      // ])->setMethod('api/v1/stock/getSpedizione')->getResult();
+      $result = service('ApiHelper')->setParams([
+        'id' => $id
+      ])->setMethod('api/v1/sales/get')->getResult();
     } catch (\Exception $e) {
       $error = $e->getMessage();
     }

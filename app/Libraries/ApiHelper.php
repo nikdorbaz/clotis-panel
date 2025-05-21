@@ -37,4 +37,11 @@ class ApiHelper
 
     return json_decode($response->getBody() ?? "", true);
   }
+
+  public function getResultOriginal()
+  {
+    $response = $this->client->post($this->method);
+
+    return $response->getBody();
+  }
 }

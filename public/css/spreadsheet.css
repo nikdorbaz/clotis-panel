@@ -1,6 +1,6 @@
 .table-wrapper {
     overflow: auto;
-    max-height: calc(100vh - 40px);
+    max-height: calc(100vh - 82px);
 }
 
 table.spreadsheet {
