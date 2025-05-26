@@ -15,7 +15,6 @@ class Manager extends BaseController
     $result = null;
     $error = null;
 
-
     $id = $manager['id'];
     $name = $manager['name'];
     try {
