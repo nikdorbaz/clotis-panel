@@ -207,5 +207,52 @@ $clientsCount = count($clients);
     }
     setupTotals("ordini", 2, 4, 3, "size");
     setupTotals("ordini", 3, 4, 3, "booking");
+
+    fixColumnWidths('ordini');
+
+
+    document.querySelectorAll('input[data-col-index]').forEach(input => {
+      input.addEventListener('input', function() {
+        const colIndex = parseInt(this.dataset.colIndex);
+        const searchValue = this.value.trim().toLowerCase();
+
+        const rows = document.querySelectorAll("table#ordini tbody tr");
+
+        rows.forEach((row, index) => {
+          if (index < 3) {
+            row.style.display = '';
+            return;
+          }
+
+          const cells = row.querySelectorAll("td");
+          const cellText = cells[colIndex].textContent.trim().toLowerCase();
+
+          if (cellText.startsWith(searchValue)) {
+            row.classList.remove('hidden');
+          } else {
+            row.classList.add('hidden');
+          }
+        });
+      });
+    });
   });
+
+  function fixColumnWidths(tableId) {
+    const table = document.getElementById(tableId);
+    const firstRow = table.querySelector("tbody tr:nth-child(4)");
+    if (!firstRow) return;
+
+    const cells = firstRow.querySelectorAll("td");
+
+    cells.forEach((cell, i) => {
+      const width = cell.offsetWidth + "px";
+      const selector = `tbody td:nth-child(${i + 1}), thead th:nth-child(${i + 1})`;
+
+      document.querySelectorAll(`#${tableId} ${selector}`).forEach(target => {
+        target.style.minWidth = width;
+        target.style.maxWidth = width;
+        target.style.overflow = "hidden";
+      });
+    });
+  }
 </script>

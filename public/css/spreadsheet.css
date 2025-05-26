@@ -8,6 +8,7 @@ table.spreadsheet {
     font-size: 10pt;
     font-family: sans-serif;
     margin-bottom: 40px;
+    table-layout: fixed;
 }
 
 .spreadsheet td {
@@ -112,4 +113,8 @@ tr {
 tr.fixed-row>td,
 tr.fixed>td {
     border-collapse: collapse;
+}
+
+tr.hidden {
+    display: none;
 }
