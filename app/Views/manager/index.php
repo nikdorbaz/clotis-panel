@@ -2,58 +2,97 @@
 
 $stocks = $result['stocks'] ?? [];
 $values = $result['values'] ?? [];
+$monthName = $result['month'] ?? "";
 
 ?>
 <?= view('styles'); ?>
 <?= view('manager/header') ?>
 
 
-<table class="spreadsheet" id="sales">
-  <tbody>
-    <tr class="fixed-row">
-      <td>#</td>
-      <td>Имя</td>
-      <td>Заказ по корзине</td>
-      <td>Остаток</td>
-      <?php foreach ($stocks as $stock): ?>
-        <td><?= esc($stock['name']) ?></td>
-      <?php endforeach; ?>
-    </tr>
-
-    <?php foreach ($values as $i => $row): ?>
-      <tr>
-        <td><?= $i + 1 ?></td>
-        <td><?= esc($row['name']) ?></td>
-        <td><?= number_format($row['total_order'], 2, '.', '') ?></td>
-        <td><?= number_format($row['remaining'], 2, '.', '') ?></td>
-
+<div class="table-wrapper">
+  <table class="spreadsheet" id="sales">
+    <tbody>
+      <tr class="fixed-row">
+        <td colspan="3"><?= $monthName ?></td>
+        <td>Заказ по корзине</td>
+        <td>Остаток</td>
         <?php foreach ($stocks as $stock): ?>
-          <?php
-          $payments = $row['payments'][$stock['id']] ?? [];
-          $j = 4 + array_search($stock['id'], array_column($stocks, 'id'));
-          ?>
-          <td data-i="<?= $i ?>" data-j="<?= $j ?>" data-stock-id="<?= $stock['id'] ?>">
-            <?php foreach ($payments as $payment): ?>
-              <span
-                class="cell-item"
-                data-id="<?= $payment['id'] ?>"
-                data-amount="<?= $payment['amount'] ?>"
-                data-date="<?= $payment['date'] ?>"
-                data-comment="<?= esc($payment['comment'] ?? '') ?>"
-                data-i="<?= $i ?>"
-                data-j="<?= $j ?>"
-                id="payment_<?= $payment['id'] ?>">
-                <?= number_format($payment['amount'], 2, '.', '') ?> € / <?= $payment['date'] ?>
-              </span>
-            <?php endforeach; ?>
-            <div class="add-payment" data-i="<?= $i ?>" data-j="<?= $j ?>" data-stock-id="<?= $stock['id'] ?>">+ Добавить оплату</div>
-          </td>
+          <td><?= esc($stock['name']) ?></td>
         <?php endforeach; ?>
+        <td>Дефекты</td>
+        <td>Остаток к оплате (Долг)</td>
+        <td>Переплата</td>
+        <td>Карта</td>
       </tr>
-    <?php endforeach; ?>
-  </tbody>
-</table>
 
+      <?php foreach ($values as $i => $row): ?>
+        <tr>
+          <td><?= $i + 1 ?></td>
+          <td><?= esc($row['uniq_id']); ?></td>
+          <td><?= esc($row['name']) ?></td>
+          <td><?= number_format($row['total_order'], 2, '.', '') ?></td>
+          <td><?= number_format($row['remaining'], 2, '.', '') ?></td>
+
+          <?php foreach ($stocks as $stock): ?>
+            <?php
+            $payments = $row['payments'][$stock['id']] ?? [];
+            $j = 5 + array_search($stock['id'], array_column($stocks, 'id'));
+            ?>
+            <td data-i="<?= $i ?>" data-j="<?= $j ?>" data-stock-id="<?= $stock['id'] ?>">
+              <?php foreach ($payments as $payment): ?>
+                <span
+                  class="cell-item"
+                  data-id="<?= $payment['id'] ?>"
+                  data-amount="<?= $payment['amount'] ?>"
+                  data-date="<?= $payment['date'] ?>"
+                  data-comment="<?= esc($payment['comment'] ?? '') ?>"
+                  data-i="<?= $i ?>"
+                  data-j="<?= $j ?>"
+                  id="payment_<?= $payment['id'] ?>">
+                  <?= number_format($payment['amount'], 2, '.', '') ?> € / <?= $payment['date'] ?>
+                </span>
+              <?php endforeach; ?>
+              <div class="add-payment" data-i="<?= $i ?>" data-j="<?= $j ?>" data-stock-id="<?= $stock['id'] ?>">+ Добавить оплату</div>
+            </td>
+          <?php endforeach; ?>
+
+          <?php
+          $baseJ = 5 + count($stocks);
+          $types = ['defect', 'debt', 'overpay', 'card'];
+          foreach ($types as $offset => $type):
+            $transactions = $row['transactions'][$type] ?? [];
+            $j = $baseJ + $offset;
+          ?>
+            <td data-i="<?= $i ?>" data-j="<?= $j ?>">
+              <?php foreach ($transactions as $t): ?>
+                <span
+                  class="cell-item"
+                  data-id="<?= $t['id'] ?>"
+                  data-amount="<?= $t['amount'] ?? '' ?>"
+                  data-date="<?= $t['date'] ?? '' ?>"
+                  data-comment="<?= esc($t['comment'] ?? '') ?>"
+                  data-i="<?= $i ?>"
+                  data-j="<?= $j ?>"
+                  id="payment_<?= $t['id'] ?>">
+                  <?php if ($type === 'defect'): ?>
+                    Дефект: <?= esc($t['article']) ?>, -<?= $t['amount'] ?> €
+                  <?php elseif ($type === 'debt'): ?>
+                    Долг: <?= esc($t['text_id']) ?>, <?= $t['date'] ?>
+                  <?php elseif ($type === 'overpay'): ?>
+                    Переплата: <?= esc($t['text_id']) ?>, <?= $t['date'] ?>
+                  <?php elseif ($type === 'card'): ?>
+                    <?= $t['amount'] ?> € / <?= $t['date'] ?>
+                  <?php endif; ?>
+                </span>
+              <?php endforeach; ?>
+              <div class="add-<?= $type ?>" data-i="<?= $i ?>" data-j="<?= $j ?>" data-stock-id="0">+ Добавить <?= $type ?></div>
+            </td>
+          <?php endforeach; ?>
+        </tr>
+      <?php endforeach; ?>
+    </tbody>
+  </table>
+</div>
 
 <div id="cellModal" class="modal">
   <div class="modal-content">
@@ -72,6 +111,86 @@ $values = $result['values'] ?? [];
 
       <label for="date">Дата:</label>
       <input type="date" id="date" name="date" required>
+
+      <button type="submit">Сохранить</button>
+    </form>
+  </div>
+</div>
+
+<div id="cellModalDefect" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <h3>Добавить дефект</h3>
+    <form id="cellFormDefect">
+      <input type="hidden" name="is_new" id="isNew">
+      <input type="hidden" name="cellRow" id="cellRow">
+      <input type="hidden" name="cellCol" id="cellCol">
+
+      <label for="article">Артикул:</label>
+      <input type="text" id="article" name="article" required>
+
+      <label for="amount">Сумма скидки:</label>
+      <input type="number" id="amount" name="amount" required>
+
+      <button type="submit">Сохранить</button>
+    </form>
+  </div>
+</div>
+
+<div id="cellModalCard" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <h3>Добавить оплату картой</h3>
+    <form id="cellFormCard">
+      <input type="hidden" name="is_new" id="isNew">
+      <input type="hidden" name="cellRow" id="cellRow">
+      <input type="hidden" name="cellCol" id="cellCol">
+
+      <label for="amount">Сумма:</label>
+      <input type="number" id="amount" name="amount" required>
+
+      <label for="date">Дата:</label>
+      <input type="date" id="date" name="date" required>
+
+      <button type="submit">Сохранить</button>
+    </form>
+  </div>
+</div>
+
+<div id="cellModalOverpay" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <h3>Добавить переплату</h3>
+    <form id="cellFormOverpay">
+      <input type="hidden" name="is_new" id="isNew">
+      <input type="hidden" name="cellRow" id="cellRow">
+      <input type="hidden" name="cellCol" id="cellCol">
+
+      <label for="text_id">ID:</label>
+      <input type="text" id="text_id" name="text_id" required>
+
+      <label for="amount">Сумма:</label>
+      <input type="number" id="amount" name="amount" required>
+
+      <button type="submit">Сохранить</button>
+    </form>
+  </div>
+</div>
+
+<div id="cellModalDebt" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <h3>Добавить долг</h3>
+    <form id="cellFormDebt">
+      <input type="hidden" name="is_new" id="isNew">
+      <input type="hidden" name="cellRow" id="cellRow">
+      <input type="hidden" name="cellCol" id="cellCol">
+
+      <label for="text_id">ID:</label>
+      <input type="text" id="text_id" name="text_id" required>
+
+      <label for="amount">Сумма:</label>
+      <input type="number" id="amount" name="amount" required>
 
       <button type="submit">Сохранить</button>
     </form>
@@ -146,6 +265,10 @@ $values = $result['values'] ?? [];
     margin-bottom: 5px;
   }
 
+  .add-defect,
+  .add-card,
+  .add-debt,
+  .add-overpay,
   .add-payment {
     visibility: hidden;
     white-space: nowrap;
@@ -157,6 +280,10 @@ $values = $result['values'] ?? [];
     color: #636363;
   }
 
+  td:hover .add-defect,
+  td:hover .add-card,
+  td:hover .add-debt,
+  td:hover .add-overpay,
   td:hover .add-payment {
     visibility: visible;
   }
@@ -181,34 +308,158 @@ $values = $result['values'] ?? [];
 </script>
 
 <script>
-  const modal = document.getElementById("cellModal");
-  const form = document.getElementById("cellForm");
+  let modalType = "payment";
+  const modals = {
+    payment: document.getElementById("cellModal"),
+    defect: document.getElementById("cellModalDefect"),
+    debt: document.getElementById("cellModalDebt"),
+    overpay: document.getElementById("cellModalOverpay"),
+    card: document.getElementById("cellModalCard")
+  };
+
+  const formMap = {
+    payment: document.querySelector("#cellForm"),
+    defect: document.querySelector("#cellFormDefect"),
+    debt: document.querySelector("#cellFormDebt"),
+    overpay: document.querySelector("#cellFormOverpay"),
+    card: document.querySelector("#cellFormCard")
+  };
 
   let currentPaymentId = null;
   let currentStockId = null;
   let currentChatId = null;
 
-  function openModal(i, j, amount = '', date = '', paymentId = null, stockId = null, chatId = null, comment = '') {
-    document.getElementById("isNew").value = !paymentId;
-    document.getElementById("cellRow").value = i;
-    document.getElementById("cellCol").value = j;
-    document.getElementById("amount").value = amount;
-    document.getElementById("date").value = (date?.length) ? date : "<?= date('Y-m-d') ?>";
-    document.getElementById("comment").value = comment ?? '';
+  function openModal(i, j, amount = '', date = '', paymentId = null, stockId = null, chatId = null, comment = '', type = "payment") {
+    modalType = type;
+    Object.values(modals).forEach(modal => modal.style.display = "none");
+
+    const activeModal = modals[type];
+    activeModal.style.display = "block";
+    const form = formMap[type];
+
+    form.querySelector("#isNew").value = !paymentId;
+    form.querySelector("#cellRow").value = i;
+    form.querySelector("#cellCol").value = j;
+
+    if (form.querySelector("#amount")) form.querySelector("#amount").value = amount;
+    if (form.querySelector("#date")) form.querySelector("#date").value = date || "<?= date('Y-m-d') ?>";
+    if (form.querySelector("#comment")) form.querySelector("#comment").value = comment || '';
+    if (form.querySelector("#article")) form.querySelector("#article").value = '';
+    if (form.querySelector("#text_id")) form.querySelector("#text_id").value = '';
 
     currentPaymentId = paymentId;
     currentStockId = stockId;
     currentChatId = chatId;
-
-    modal.style.display = "block";
   }
 
   function closeModal() {
-    modal.style.display = "none";
+    Object.values(modals).forEach(modal => modal.style.display = "none");
   }
 
+  // отправка форм
+  Object.entries(formMap).forEach(([type, form]) => {
+    form?.addEventListener("submit", async function(e) {
+      e.preventDefault();
+      if (modalType !== type) return;
+
+      const row = form.cellRow.value;
+      const col = form.cellCol.value;
+      const isNew = form.isNew.value === "true";
+
+      let payload = {
+        payment_id: isNew ? null : currentPaymentId,
+        chat_id: currentChatId,
+        stock_id: currentStockId
+      };
+
+      switch (modalType) {
+        case "payment":
+        case "card":
+          payload.amount = form.amount.value;
+          payload.date = form.date.value;
+          payload.comment = form.comment?.value || '';
+          break;
+        case "defect":
+          payload.article = form.article.value;
+          payload.amount = form.amount.value;
+          break;
+        case "debt":
+        case "overpay":
+          payload.amount = form.amount.value;
+          payload.text_id = form.text_id.value;
+          break;
+      }
+
+      const endpointMap = {
+        payment: "/api/v1/sales/update",
+        defect: "/api/v1/sales/defect",
+        debt: "/api/v1/sales/debt",
+        overpay: "/api/v1/sales/overpay",
+        card: "/api/v1/sales/card"
+      };
+
+      try {
+        const response = await fetch('https://clotiss.site' + endpointMap[modalType], {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        if (data.result) {
+          const table = document.getElementById("sales");
+          const targetRow = table.rows[+row + 1];
+          const cell = targetRow.cells[+col];
+
+          if (isNew) {
+            let span = document.createElement('span');
+            span.classList.add('cell-item');
+            span.setAttribute('id', `payment_${data.id}`);
+            span.dataset.id = data.id;
+            span.dataset.amount = payload.amount || '';
+            span.dataset.date = payload.date || '';
+            span.dataset.comment = payload.comment || '';
+            span.dataset.i = row;
+            span.dataset.j = col;
+
+            if (modalType === 'payment' || modalType === 'card') {
+              span.innerText = `${payload.amount} € / ${payload.date}`;
+            } else if (modalType === 'defect') {
+              span.innerText = `Дефект: ${payload.article}, -${payload.amount} €`;
+            } else if (modalType === 'debt') {
+              span.innerText = `Долг: ${payload.text_id}, ${payload.date}`;
+            } else if (modalType === 'overpay') {
+              span.innerText = `Переплата: ${payload.text_id}, ${payload.date}`;
+            }
+
+            cell.prepend(span);
+
+            span.addEventListener('click', () => openModal(row, col, payload.amount || '', payload.date || '', data.id, currentStockId, currentChatId, payload.comment || '', modalType));
+          } else {
+            const existing = document.getElementById(`payment_${currentPaymentId}`);
+            if (existing) {
+              existing.innerText = `${payload.amount} € / ${payload.date}`;
+              existing.dataset.amount = payload.amount;
+              existing.dataset.date = payload.date;
+              existing.dataset.comment = payload.comment;
+            }
+          }
+
+          closeModal();
+        } else {
+          alert("Ошибка при сохранении: " + data.message);
+        }
+      } catch (err) {
+        console.error("Ошибка запроса:", err);
+        alert("Не удалось отправить данные на сервер.");
+      }
+    });
+  });
+
   // получаем ID клиентов
-  const chatIds = <?= json_encode(array_column($values, 'client_id')) ?>;
+  const chatIds = <?= json_encode(array_column($values ?? [], 'client_id')) ?>;
 
   // обработка кликов по существующим платежам
   document.querySelectorAll('.cell-item').forEach((el) => {
@@ -221,90 +472,18 @@ $values = $result['values'] ?? [];
     const stockId = el.closest('td').dataset.stockId;
     const chatId = chatIds[i];
 
-    el.addEventListener('click', () => openModal(i, j, amount, date, paymentId, stockId, chatId, comment));
+    el.addEventListener('click', () => openModal(i, j, amount, date, paymentId, stockId, chatId, comment, 'payment'));
   });
 
   // обработка добавления нового платежа
-  document.querySelectorAll(".add-payment").forEach((el) => {
-    const j = el.dataset.j;
-    const i = el.dataset.i;
-    const stockId = el.dataset.stockId;
-    const chatId = chatIds[i];
-
-    el.addEventListener("click", () => openModal(i, j, '', '', null, stockId, chatId, ''));
+  ["add-payment", "add-defect", "add-debt", "add-overpay", "add-card"].forEach(cls => {
+    document.querySelectorAll("." + cls).forEach((el) => {
+      const j = el.dataset.j;
+      const i = el.dataset.i;
+      const stockId = el.dataset.stockId;
+      const chatId = chatIds[i];
+      const type = cls.replace("add-", "");
+      el.addEventListener("click", () => openModal(i, j, '', '', null, stockId, chatId, '', type));
+    });
   });
-
-  form.addEventListener("submit", async function(e) {
-    e.preventDefault();
-
-    const row = form.cellRow.value;
-    const col = form.cellCol.value;
-    const amount = form.amount.value;
-    const date = form.date.value;
-    const comment = form.comment.value;
-    const isNew = document.getElementById("isNew").value === "true";
-
-    try {
-      const response = await fetch("https://clotiss.site/api/v1/sales/update", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          payment_id: isNew ? null : currentPaymentId,
-          chat_id: currentChatId,
-          stock_id: currentStockId,
-          amount: amount,
-          date: date,
-          comment: comment
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.result) {
-        const table = document.getElementById("sales");
-        const targetRow = table.rows[+row + 1];
-        const cell = targetRow.cells[+col];
-
-        if (isNew) {
-          let span = document.createElement('span');
-          span.innerText = `${amount} € / ${date}`;
-          span.classList.add('cell-item');
-          span.setAttribute('id', `payment_${data.id}`);
-          span.dataset.id = data.id;
-          span.dataset.amount = amount;
-          span.dataset.date = date;
-          span.dataset.comment = comment;
-          span.dataset.i = row;
-          span.dataset.j = col;
-
-          cell.prepend(span);
-
-          span.addEventListener('click', () => openModal(row, col, amount, date, data.id, currentStockId, currentChatId, comment));
-        } else {
-          const existing = document.getElementById(`payment_${currentPaymentId}`);
-          if (existing) {
-            existing.innerText = `${amount} € / ${date}`;
-            existing.dataset.amount = amount;
-            existing.dataset.date = date;
-            existing.dataset.comment = comment;
-          }
-        }
-
-        closeModal();
-      } else {
-        alert("Ошибка при сохранении: " + data.message);
-      }
-    } catch (error) {
-      console.error("Ошибка запроса:", error);
-      alert("Не удалось отправить данные на сервер.");
-    }
-  });
-
-  window.onclick = function(event) {
-    if (event.target === modal) {
-      closeModal();
-    }
-  };
 </script>

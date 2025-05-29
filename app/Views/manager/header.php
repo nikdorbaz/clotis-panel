@@ -22,15 +22,28 @@
 
 <div id="history-panel" class="history-panel">
   <div class="history-header">
-    <span>История версий</span>
+    <span>Навигация</span>
     <button onclick="toggleHistory()">✕</button>
   </div>
   <div class="history-content">
-    <ul>
-      <li><a href="<?= base_url('stock/history/05') ?>">05 <span class="history-date"><?= date('d-m-Y') ?></span></a></li>
-      <li><a href="<?= base_url('stock/history/05') ?>">04 <span class="history-date"><?= date('d-m-Y') ?></span></a></li>
-      <li><a href="<?= base_url('stock/history/05') ?>">03 <span class="history-date"><?= date('d-m-Y') ?></span></a></li>
-    </ul>
+    <div class="history-nav">
+      <div class="history-title">
+        Таблица
+      </div>
+      <ul>
+        <li><a href="<?= base_url('manager') ?>" class="<?= service('uri')->getSegment(2) === '' ? 'active' : '' ?>">Оплаты</a></li>
+        <li><a href="<?= base_url('manager/monthly') ?>" class="<?= service('uri')->getSegment(2) === 'monthly' ? 'active' : '' ?>">Оплата по месяцам</a></li>
+        <li><a href="<?= base_url('manager/difference') ?>" class="<?= service('uri')->getSegment(2) === 'difference' ? 'active' : '' ?>">Таблица разницы</a></li>
+      </ul>
+    </div>
+    <div class="history-nav">
+      <div class="history-title">
+        История версий
+      </div>
+      <ul>
+
+      </ul>
+    </div>
   </div>
 </div>
 
@@ -132,6 +145,7 @@
   .history-content ul {
     list-style: none;
     padding-left: 0;
+    margin-top: 0;
   }
 
   .history-content li {
@@ -153,6 +167,19 @@
     display: flex;
     align-items: center;
     gap: 10px;
+  }
+
+  .history-nav a.active {
+    font-weight: bold;
+    color: #007bff;
+    text-decoration: underline;
+  }
+
+  .history-title {
+    background-color: #cdcdcd;
+    padding: 4px 6px;
+    margin-bottom: 5px;
+    font-size: 18px;
   }
 </style>
 

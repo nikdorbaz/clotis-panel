@@ -175,10 +175,10 @@ $clientsCount = count($clients);
           const newContent = cell.innerText.trim();
 
           console.log(newContent, previousContent);
-          if (newContent !== previousContent) {
-            cell.classList.add("changed");
-            apiRequest(cell.dataset.product_id, cell.dataset.client_id, newContent);
-          }
+          // if (newContent !== previousContent) {
+          cell.classList.add("changed");
+          apiRequest(cell.dataset.product_id, cell.dataset.client_id, newContent);
+          // }
           recalculateSum();
         });
       }

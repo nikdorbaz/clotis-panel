@@ -1,6 +1,6 @@
 .table-wrapper {
     overflow: auto;
-    max-height: calc(100vh - 82px);
+    max-height: calc(100vh - 90px);
 }
 
 table.spreadsheet {
@@ -47,7 +47,6 @@ table.spreadsheet .fixed-row,
 table.spreadsheet tr.fixed {
     background-color: var(--cell-bg-color);
     border: 0;
-    box-shadow: inset 0 0 0 0.5px var(--cell-border-color)
 }
 
 table.spreadsheet td.fixed-col {

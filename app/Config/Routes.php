@@ -16,4 +16,6 @@ $routes->group('stock', static function ($routes) {
 
 $routes->group('manager', static function ($routes) {
   $routes->add('/', 'Manager::index');
+  $routes->add('monthly', 'Manager::monthly');
+  $routes->add('difference', 'Manager::difference');
 });
