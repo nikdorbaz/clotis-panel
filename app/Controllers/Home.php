@@ -32,13 +32,13 @@ class Home extends BaseController
                     session()->set('stock', $response['stock']);
 
                     // Можно редиректить на конкретный склад, если нужно
-                    return redirect()->to('/stock');
+                    return redirect()->to('stock');
                 } elseif (isset($response['manager'])) {
                     // Пример: сохраняем в сессии stock ID (или другой нужный объект)
                     session()->set('manager', $response['manager']);
 
                     // Можно редиректить на конкретный склад, если нужно
-                    return redirect()->to('/manager');
+                    return redirect()->to('manager');
                 }
             }
 
