@@ -3,6 +3,7 @@
 namespace App\Libraries;
 
 use CodeIgniter\Config\Services;
+use Exception;
 
 class ApiHelper
 {
@@ -34,6 +35,10 @@ class ApiHelper
   public function getResult()
   {
     $response = $this->client->post($this->method);
+
+    if ($response->getStatusCode() == 500) {
+      throw new Exception("Doesn't work");
+    }
 
     return json_decode($response->getBody() ?? "", true);
   }

@@ -11,7 +11,8 @@ $routes->post('logout', 'Home::logout');
 
 $routes->group('stock', static function ($routes) {
   $routes->add('/', 'Stock::index');
-  $routes->add('history/(:num)', 'Stock::history/$1');
+  $routes->add('history/(:segment)', 'Stock::history/$1');
+  $routes->get('table-data', 'Stock::tableData');
 });
 
 $routes->group('manager', static function ($routes) {

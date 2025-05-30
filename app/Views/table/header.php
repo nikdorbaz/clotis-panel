@@ -2,7 +2,7 @@
 
   <div class="stock-info">
     <div class="stock-info__name">
-      <?= $name ?>
+      <?= $stock['name'] ?? "" ?>
     </div>
     <div class="stock-info__date">
       <?= date('d-m-Y'); ?>
@@ -27,9 +27,10 @@
   </div>
   <div class="history-content">
     <ul>
-      <li><a href="<?= base_url('stock/history/05') ?>">05 <span class="history-date"><?= date('d-m-Y') ?></span></a></li>
-      <li><a href="<?= base_url('stock/history/05') ?>">04 <span class="history-date"><?= date('d-m-Y') ?></span></a></li>
-      <li><a href="<?= base_url('stock/history/05') ?>">03 <span class="history-date"><?= date('d-m-Y') ?></span></a></li>
+      <li><a href="<?= base_url("stock/?type=" . $type) ?>">Актуальная версия</span></a></li>
+      <? foreach ($months as $month): ?>
+        <li><a href="<?= base_url("stock/history/$month?type=" . $type) ?>">05 <span class="history-date"><?= date('d-m-Y') ?></span></a></li>
+      <? endforeach; ?>
     </ul>
   </div>
 </div>

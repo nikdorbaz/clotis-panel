@@ -186,7 +186,7 @@ $clientsCount = count($clients);
   }
 
   const apiRequest = async (product_id, client_id, value) => {
-    let url = "https://clotiss.site/api/v1/update";
+    let url = "https://clotiss.site/api/v1/update/actually";
     const xhr = new XMLHttpRequest();
     const formData = new FormData();
 
@@ -196,6 +196,7 @@ $clientsCount = count($clients);
     formData.append("product_id", product_id);
     formData.append("client_id", client_id);
     formData.append("value", value);
+    formData.append('stock_id', "<?= $stock['id'] ?>");
 
     xhr.send(formData);
   };
