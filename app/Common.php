@@ -13,7 +13,3 @@
  *
  * @see: https://codeigniter.com/user_guide/extending/common.html
  */
-
-$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https" : "http";
-$host = $_SERVER['HTTP_HOST'] ?? 'localhost:8081';
-define('BASE_URL', $protocol . '://' . $host . '/');

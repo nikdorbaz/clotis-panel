@@ -50,9 +50,12 @@ $monthName = $result['month'] ?? "";
                   data-j="<?= $j ?>"
                   id="payment_<?= $payment['id'] ?>">
                   <?= number_format($payment['amount'], 2, '.', '') ?> € / <?= $payment['date'] ?>
+
+                  <button class="delete-btn" data-id="<?= $payment['id'] ?>" data-type="payment">×</button>
                 </span>
               <?php endforeach; ?>
               <div class="add-payment" data-i="<?= $i ?>" data-j="<?= $j ?>" data-stock-id="<?= $stock['id'] ?>">+ Добавить оплату</div>
+
             </td>
           <?php endforeach; ?>
 
@@ -83,6 +86,7 @@ $monthName = $result['month'] ?? "";
                   <?php elseif ($type === 'card'): ?>
                     <?= $t['amount'] ?> € / <?= $t['date'] ?>
                   <?php endif; ?>
+                  <button class="delete-btn" data-id="<?= $t['id'] ?>" data-type="<?= $type ?>">×</button>
                 </span>
               <?php endforeach; ?>
               <div class="add-<?= $type ?>" data-i="<?= $i ?>" data-j="<?= $j ?>" data-stock-id="0">+ Добавить <?= $type ?></div>
@@ -263,6 +267,7 @@ $monthName = $result['month'] ?? "";
     white-space: nowrap;
     background-color: #cbcbcb;
     margin-bottom: 5px;
+    justify-content: space-between;
   }
 
   .add-defect,
@@ -286,6 +291,15 @@ $monthName = $result['month'] ?? "";
   td:hover .add-overpay,
   td:hover .add-payment {
     visibility: visible;
+  }
+
+  .delete-btn {
+    background: none;
+    border: none;
+    color: red;
+    margin-left: 8px;
+    font-weight: bold;
+    cursor: pointer;
   }
 </style>
 
@@ -484,6 +498,47 @@ $monthName = $result['month'] ?? "";
       const chatId = chatIds[i];
       const type = cls.replace("add-", "");
       el.addEventListener("click", () => openModal(i, j, '', '', null, stockId, chatId, '', type));
+    });
+  });
+
+  document.querySelectorAll(".delete-btn").forEach(btn => {
+    btn.addEventListener("click", async (e) => {
+      e.stopPropagation(); // чтобы не открывался модал
+      const id = btn.dataset.id;
+      const type = btn.dataset.type;
+
+      if (!confirm("Удалить запись?")) return;
+
+      const endpointMap = {
+        payment: "/api/v1/sales/deletePayment",
+        defect: "/api/v1/sales/deleteTransaction",
+        debt: "/api/v1/sales/deleteTransaction",
+        overpay: "/api/v1/sales/deleteTransaction",
+        card: "/api/v1/sales/deleteTransaction"
+      };
+
+      try {
+        const response = await fetch('https://clotiss.site' + endpointMap[type], {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            id
+          })
+        });
+
+        const data = await response.json();
+        if (data.result) {
+          // Удаление DOM элемента
+          btn.closest(".cell-item").remove();
+        } else {
+          alert("Ошибка при удалении: " + data.message);
+        }
+      } catch (err) {
+        console.error("Ошибка запроса:", err);
+        alert("Не удалось отправить данные на сервер.");
+      }
     });
   });
 </script>
