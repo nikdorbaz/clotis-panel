@@ -10,7 +10,14 @@
   </div>
 
   <div class="controls">
-    <button type="button" class="history-button" onclick="toggleHistory()"><img src="/svg/history.svg"></button>
+    <button type="button" class="history-button" onclick="toggleHistory()">
+      <? if (service('uri')->getSegment(2) == 'history'): ?>
+        Заказы за <?= service('uri')->getSegment(3); ?>
+      <? else: ?>
+        Актуальная версия
+      <? endif; ?>
+      <img src="/svg/history.svg">
+    </button>
 
     <form action="<?= site_url('logout') ?>" method="post" class="logout">
       <?= csrf_field() ?>
@@ -29,7 +36,7 @@
     <ul>
       <li><a href="<?= base_url("stock/?type=" . $type) ?>">Актуальная версия</span></a></li>
       <? foreach ($months as $month): ?>
-        <li><a href="<?= base_url("stock/history/$month?type=" . $type) ?>">05 <span class="history-date"><?= date('d-m-Y') ?></span></a></li>
+        <li><a href="<?= base_url("stock/history/$month?type=" . $type) ?>">Просмотреть заказы <?= $month ?></span></a></li>
       <? endforeach; ?>
     </ul>
   </div>
@@ -78,12 +85,12 @@
     align-items: center;
     justify-content: center;
     background-color: transparent;
-    color: white;
     border: none;
     font-size: 14px;
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    gap: 10px;
   }
 
   .history-button img {

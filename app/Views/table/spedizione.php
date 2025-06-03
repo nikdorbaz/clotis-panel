@@ -17,13 +17,16 @@ $clients = $result['clients'] ?? [];
       <td>TOTALE</td>
     </tr>
     <?php foreach ($clients as $client): ?>
-
       <tr>
         <td>#</td>
         <td><?= esc($client['uniq_id']) ?></td>
         <td><?= esc($client['country']) ?></td>
-        <td></td>
-        <td></td>
+        <td data-chat_id="<?= $client['chat_id'] ?>" data-type="kg" class="<?= !empty($client['kg']) ? "changed" : "" ?>">
+          <?= $client['kg'] ?? "" ?>
+        </td>
+        <td data-chat_id="<?= $client['chat_id'] ?>" data-type="count" class="<?= !empty($client['count']) ? "changed" : "" ?>">
+          <?= $client['count'] ?? "" ?>
+        </td>
         <td><?= esc($client['total_sum']) ?> €</td>
       </tr>
     <?php endforeach; ?>
@@ -92,15 +95,36 @@ $clients = $result['clients'] ?? [];
   }
 
   // Слушаем изменения всех редактируемых ячеек
-  document.querySelectorAll("#spedizione td").forEach(cell => {
+  document.querySelectorAll("#spedizione td[data-chat_id]").forEach(cell => {
     cell.setAttribute("contenteditable", true);
-    cell.addEventListener("blur", updateSpedizioneTotals);
-    cell.addEventListener("input", () => {
+    cell.addEventListener("blur", () => {
       cell.classList.add("changed");
+
+      const newContent = cell.innerText.trim();
+      apiRequest(cell.dataset.chat_id, newContent, cell.dataset.type);
+
+      updateSpedizioneTotals();
     });
   });
 
   window.addEventListener("DOMContentLoaded", updateSpedizioneTotals);
+
+  const apiRequest = async (chat_id, value, type) => {
+    let url = "https://clotiss.site/api/v1/update/count";
+    const xhr = new XMLHttpRequest();
+    const formData = new FormData();
+
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+
+    formData.append("chat_id", chat_id);
+    formData.append("value", value);
+    formData.append("type", type);
+    formData.append('stock_id', "<?= $stock['id'] ?>");
+
+
+    xhr.send(formData);
+  };
 </script>
 
 

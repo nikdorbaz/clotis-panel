@@ -228,7 +228,9 @@ $clientsCount = count($clients);
           const cells = row.querySelectorAll("td");
           const cellText = cells[colIndex].textContent.trim().toLowerCase();
 
-          if (cellText.startsWith(searchValue)) {
+          if (!searchValue.length) {
+            row.classList.remove('hidden');
+          } else if (cellText === searchValue) {
             row.classList.remove('hidden');
           } else {
             row.classList.add('hidden');

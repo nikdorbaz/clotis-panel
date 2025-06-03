@@ -78,7 +78,7 @@ $monthName = $result['month'] ?? "";
                   data-j="<?= $j ?>"
                   id="payment_<?= $t['id'] ?>">
                   <?php if ($type === 'defect'): ?>
-                    Дефект: <?= esc($t['article']) ?>, -<?= $t['amount'] ?> €
+                    Дефект: <?= esc($t['text_id']) ?>, -<?= $t['amount'] ?> €
                   <?php elseif ($type === 'debt'): ?>
                     Долг: <?= esc($t['text_id']) ?>, <?= $t['date'] ?>
                   <?php elseif ($type === 'overpay'): ?>
@@ -130,8 +130,8 @@ $monthName = $result['month'] ?? "";
       <input type="hidden" name="cellRow" id="cellRow">
       <input type="hidden" name="cellCol" id="cellCol">
 
-      <label for="article">Артикул:</label>
-      <input type="text" id="article" name="article" required>
+      <label for="text_id">Артикул:</label>
+      <input type="text" id="text_id" name="text_id" required>
 
       <label for="amount">Сумма скидки:</label>
       <input type="number" id="amount" name="amount" required>
@@ -358,7 +358,6 @@ $monthName = $result['month'] ?? "";
     if (form.querySelector("#amount")) form.querySelector("#amount").value = amount;
     if (form.querySelector("#date")) form.querySelector("#date").value = date || "<?= date('Y-m-d') ?>";
     if (form.querySelector("#comment")) form.querySelector("#comment").value = comment || '';
-    if (form.querySelector("#article")) form.querySelector("#article").value = '';
     if (form.querySelector("#text_id")) form.querySelector("#text_id").value = '';
 
     currentPaymentId = paymentId;
@@ -394,7 +393,7 @@ $monthName = $result['month'] ?? "";
           payload.comment = form.comment?.value || '';
           break;
         case "defect":
-          payload.article = form.article.value;
+          payload.text_id = form.text_id.value;
           payload.amount = form.amount.value;
           break;
         case "debt":
@@ -441,7 +440,7 @@ $monthName = $result['month'] ?? "";
             if (modalType === 'payment' || modalType === 'card') {
               span.innerText = `${payload.amount} € / ${payload.date}`;
             } else if (modalType === 'defect') {
-              span.innerText = `Дефект: ${payload.article}, -${payload.amount} €`;
+              span.innerText = `Дефект: ${payload.text_id}, -${payload.amount} €`;
             } else if (modalType === 'debt') {
               span.innerText = `Долг: ${payload.text_id}, ${payload.date}`;
             } else if (modalType === 'overpay') {

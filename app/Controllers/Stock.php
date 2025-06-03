@@ -66,7 +66,7 @@ class Stock extends BaseController
       ])->setMethod('api/v1/stock/getHistory')->getResult();
 
       $months = service('ApiHelper')->setParams([
-        'id' => $id,
+        'id' => $stockId,
         'type' => $type,
       ])->setMethod('api/v1/stock/historyMonths')->getResult();
 
