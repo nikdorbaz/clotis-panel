@@ -13,9 +13,9 @@ $monthName = $result['month'] ?? "";
   <table class="spreadsheet" id="sales">
     <tbody>
       <tr class="fixed-row">
-        <td colspan="3"><?= $monthName ?></td>
-        <td>Заказ по корзине</td>
-        <td>Остаток</td>
+        <td colspan="3" class="fixed-col"><?= $monthName ?></td>
+        <td class="fixed-col">Заказ по корзине</td>
+        <td class="fixed-col">Остаток</td>
         <?php foreach ($stocks as $stock): ?>
           <td><?= esc($stock['name']) ?></td>
         <?php endforeach; ?>
@@ -27,11 +27,11 @@ $monthName = $result['month'] ?? "";
 
       <?php foreach ($values as $i => $row): ?>
         <tr>
-          <td><?= $i + 1 ?></td>
-          <td><?= esc($row['uniq_id']); ?></td>
-          <td><?= esc($row['name']) ?></td>
-          <td><?= number_format($row['total_order'], 2, '.', '') ?></td>
-          <td><?= number_format($row['remaining'], 2, '.', '') ?></td>
+          <td class="fixed-col"><?= $i + 1 ?></td>
+          <td class="fixed-col"><?= esc($row['uniq_id']); ?></td>
+          <td class="fixed-col"><?= esc($row['name']) ?></td>
+          <td class="fixed-col"><?= number_format($row['total_order'], 2, '.', '') ?></td>
+          <td class="fixed-col"><?= number_format($row['remaining'], 2, '.', '') ?></td>
 
           <?php foreach ($stocks as $stock): ?>
             <?php
@@ -94,6 +94,13 @@ $monthName = $result['month'] ?? "";
           <?php endforeach; ?>
         </tr>
       <?php endforeach; ?>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>123</td>
+        <td>123</td>
+      </tr>
     </tbody>
   </table>
 </div>
@@ -539,12 +546,5 @@ $monthName = $result['month'] ?? "";
         alert("Не удалось отправить данные на сервер.");
       }
     });
-  });
-
-  // Пример использования:
-  window.addEventListener("load", () => {
-    if (window.innerWidth > 767) {
-      applyStickyTable("sales", 3, 6);
-    }
   });
 </script>
