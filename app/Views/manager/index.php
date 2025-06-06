@@ -540,4 +540,11 @@ $monthName = $result['month'] ?? "";
       }
     });
   });
+
+  // Пример использования:
+  window.addEventListener("load", () => {
+    if (window.innerWidth > 767) {
+      applyStickyTable("sales", 3, 6);
+    }
+  });
 </script>
