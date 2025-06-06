@@ -14,6 +14,7 @@ $monthName = $result['month'] ?? "";
     <tbody>
       <tr class="fixed-row">
         <td colspan="3" class="fixed-col"><?= $monthName ?></td>
+        <td class="fixed-col">Актуальна сумам заказа</td>
         <td class="fixed-col">Заказ по корзине</td>
         <td class="fixed-col">Остаток</td>
         <?php foreach ($stocks as $stock): ?>
@@ -31,6 +32,7 @@ $monthName = $result['month'] ?? "";
           <td class="fixed-col"><?= esc($row['uniq_id']); ?></td>
           <td class="fixed-col"><?= esc($row['name']) ?></td>
           <td class="fixed-col"><?= number_format($row['total_order'], 2, '.', '') ?></td>
+          <td class="fixed-col"><?= number_format($row['cart_order'], 2, '.', '') ?></td>
           <td class="fixed-col"><?= number_format($row['remaining'], 2, '.', '') ?></td>
 
           <?php foreach ($stocks as $stock): ?>
@@ -95,11 +97,12 @@ $monthName = $result['month'] ?? "";
         </tr>
       <?php endforeach; ?>
       <tr>
+        <td>Totale</td>
         <td></td>
         <td></td>
-        <td></td>
-        <td>123</td>
-        <td>123</td>
+        <td><?= $result['actually_total'] ?></td>
+        <td><?= $result['cart_total'] ?></td>
+        <td><?= $result['remaining_total'] ?></td>
       </tr>
     </tbody>
   </table>
@@ -317,13 +320,13 @@ $monthName = $result['month'] ?? "";
   // Пример использования:
   window.addEventListener("load", () => {
     if (window.innerWidth > 767) {
-      applyStickyTable("sales", 1, 4);
+      applyStickyTable("sales", 1, 6);
     }
   });
 
   window.addEventListener('resize', () => {
     if (window.innerWidth > 767) {
-      applyStickyTable('sales', 1, 4);
+      applyStickyTable('sales', 1, 6);
     }
   });
 </script>
