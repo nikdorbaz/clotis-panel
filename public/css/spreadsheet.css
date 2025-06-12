@@ -117,3 +117,8 @@ tr.fixed>td {
 tr.hidden {
     display: none;
 }
+
+td.active {
+    border: 1px solid #2fff00;
+    background-color: #d8ffcf;
+}

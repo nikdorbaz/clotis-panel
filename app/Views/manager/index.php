@@ -38,7 +38,7 @@ $monthName = $result['month'] ?? "";
           <?php foreach ($stocks as $stock): ?>
             <?php
             $payments = $row['payments'][$stock['id']] ?? [];
-            $j = 5 + array_search($stock['id'], array_column($stocks, 'id'));
+            $j = 6 + array_search($stock['id'], array_column($stocks, 'id'));
             ?>
             <td data-i="<?= $i ?>" data-j="<?= $j ?>" data-stock-id="<?= $stock['id'] ?>">
               <?php foreach ($payments as $payment): ?>
@@ -62,7 +62,7 @@ $monthName = $result['month'] ?? "";
           <?php endforeach; ?>
 
           <?php
-          $baseJ = 5 + count($stocks);
+          $baseJ = 6 + count($stocks);
           $types = ['defect', 'debt', 'overpay', 'card'];
           foreach ($types as $offset => $type):
             $transactions = $row['transactions'][$type] ?? [];
@@ -355,6 +355,13 @@ $monthName = $result['month'] ?? "";
 
   function openModal(i, j, amount = '', date = '', paymentId = null, stockId = null, chatId = null, comment = '', type = "payment") {
     modalType = type;
+
+    const table = document.getElementById("sales");
+    const targetRow = table.rows[+i + 1];
+    const cell = targetRow.cells[+j];
+
+    cell.classList.add('active');
+
     Object.values(modals).forEach(modal => modal.style.display = "none");
 
     const activeModal = modals[type];
@@ -376,6 +383,7 @@ $monthName = $result['month'] ?? "";
   }
 
   function closeModal() {
+    document.querySelectorAll('td.active').forEach(td => td.classList.remove('active'));
     Object.values(modals).forEach(modal => modal.style.display = "none");
   }
 
@@ -436,6 +444,8 @@ $monthName = $result['month'] ?? "";
           const targetRow = table.rows[+row + 1];
           const cell = targetRow.cells[+col];
 
+          cell.classList.remove('active');
+
           if (isNew) {
             let span = document.createElement('span');
             span.classList.add('cell-item');
@@ -452,10 +462,24 @@ $monthName = $result['month'] ?? "";
             } else if (modalType === 'defect') {
               span.innerText = `Дефект: ${payload.text_id}, -${payload.amount} €`;
             } else if (modalType === 'debt') {
-              span.innerText = `Долг: ${payload.text_id}, ${payload.date}`;
+              span.innerText = `Долг: ${payload.text_id}, ${payload.amount}`;
             } else if (modalType === 'overpay') {
-              span.innerText = `Переплата: ${payload.text_id}, ${payload.date}`;
+              span.innerText = `Переплата: ${payload.text_id}, ${payload.amount}`;
             }
+
+            let deleteBtn = document.createElement('button');
+
+            deleteBtn.classList.add('delete-btn');
+            deleteBtn.dataset.id = data.id;
+            deleteBtn.dataset.type = type;
+            deleteBtn.innerText = '×';
+
+            span.append(deleteBtn);
+
+            deleteBtn.addEventListener("click", (e) => {
+              e.stopPropagation();
+              deleteItem(deleteBtn);
+            });
 
             cell.prepend(span);
 
@@ -511,43 +535,46 @@ $monthName = $result['month'] ?? "";
   });
 
   document.querySelectorAll(".delete-btn").forEach(btn => {
-    btn.addEventListener("click", async (e) => {
-      e.stopPropagation(); // чтобы не открывался модал
-      const id = btn.dataset.id;
-      const type = btn.dataset.type;
-
-      if (!confirm("Удалить запись?")) return;
-
-      const endpointMap = {
-        payment: "/api/v1/sales/deletePayment",
-        defect: "/api/v1/sales/deleteTransaction",
-        debt: "/api/v1/sales/deleteTransaction",
-        overpay: "/api/v1/sales/deleteTransaction",
-        card: "/api/v1/sales/deleteTransaction"
-      };
-
-      try {
-        const response = await fetch('https://clotiss.site' + endpointMap[type], {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            id
-          })
-        });
-
-        const data = await response.json();
-        if (data.result) {
-          // Удаление DOM элемента
-          btn.closest(".cell-item").remove();
-        } else {
-          alert("Ошибка при удалении: " + data.message);
-        }
-      } catch (err) {
-        console.error("Ошибка запроса:", err);
-        alert("Не удалось отправить данные на сервер.");
-      }
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      deleteItem(btn);
     });
   });
+
+  async function deleteItem(btn) {
+    const id = btn.dataset.id;
+    const type = btn.dataset.type;
+
+    if (!confirm("Удалить запись?")) return;
+
+    const endpointMap = {
+      payment: "/api/v1/sales/deletePayment",
+      defect: "/api/v1/sales/deleteTransaction",
+      debt: "/api/v1/sales/deleteTransaction",
+      overpay: "/api/v1/sales/deleteTransaction",
+      card: "/api/v1/sales/deleteTransaction"
+    };
+
+    try {
+      const response = await fetch('https://clotiss.site' + endpointMap[type], {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          id
+        })
+      });
+
+      const data = await response.json();
+      if (data.result) {
+        btn.closest(".cell-item").remove();
+      } else {
+        alert("Ошибка при удалении: " + data.message);
+      }
+    } catch (err) {
+      console.error("Ошибка запроса:", err);
+      alert("Не удалось отправить данные на сервер.");
+    }
+  }
 </script>
