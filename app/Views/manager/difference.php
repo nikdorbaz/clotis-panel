@@ -3,6 +3,9 @@
 $values = $result['values'] ?? [];
 $stocks = $result['stocks'] ?? [];
 
+
+$totals = [];
+
 ?>
 
 <?= view('styles'); ?>
@@ -15,11 +18,23 @@ $stocks = $result['stocks'] ?? [];
       <tbody>
         <? foreach ($values as $k => $row): ?>
           <tr class="<?= (!$k) ? "fixed-row" : "" ?>">
-            <? foreach ($row as $value): ?>
+            <? foreach ($row as $i => $value): ?>
               <td><?= $value ?></td>
+
+              <?php
+              $totals[$i] = ($totals[$i] ?? 0) + (float)$value; ?>
             <? endforeach; ?>
           </tr>
         <? endforeach; ?>
+        <tr>
+          <td colspan="2">Totale</td>
+          <?php foreach ($totals as $i => $total): ?>
+            <? if ($i < 2) {
+              continue;
+            } ?>
+            <td><strong><?= $total ?></strong></td>
+          <?php endforeach; ?>
+        </tr>
       </tbody>
     </table>
 

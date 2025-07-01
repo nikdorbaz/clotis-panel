@@ -206,8 +206,8 @@ $clientsCount = count($clients);
     if (window.innerWidth > 767) {
       applyStickyTable("ordini", 3, 6);
     }
-    setupTotals("ordini", 2, 4, 3, "size");
-    setupTotals("ordini", 3, 4, 3, "booking");
+    setupTotals("ordini", 2, 6, 3, "size");
+    setupTotals("ordini", 3, 6, 3, "booking");
 
     fixColumnWidths('ordini');
 
