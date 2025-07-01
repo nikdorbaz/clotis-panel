@@ -55,6 +55,13 @@ $clients = $result['clients'] ?? [];
 </style>
 
 <script>
+  const parseKgValue = (str) => {
+    return str
+      .split("+")
+      .map(v => parseFloat(v.trim()) || 0)
+      .reduce((a, b) => a + b, 0);
+  };
+
   function updateSpedizioneTotals() {
     const rows = document.querySelectorAll("#spedizione tbody tr:not(.fixed-row)");
     const totals = {};
@@ -62,9 +69,11 @@ $clients = $result['clients'] ?? [];
     rows.forEach(row => {
       const cells = row.querySelectorAll("td");
       const country = cells[2]?.textContent.trim();
-      const kg = parseFloat(cells[3]?.textContent) || 0;
+      const kgStr = cells[3]?.textContent || "";
       const colli = parseFloat(cells[4]?.textContent) || 0;
       const total = parseFloat(cells[5]?.textContent.replace('€', '').trim()) || 0;
+
+      const kg = parseKgValue(kgStr);
 
       if (!totals[country]) {
         totals[country] = {
@@ -86,7 +95,7 @@ $clients = $result['clients'] ?? [];
       const tr = document.createElement("tr");
       tr.innerHTML = `
       <td>${country}</td>
-      <td>${data.kg}</td>
+      <td>${data.kg.toFixed(2)}</td>
       <td>${data.colli}</td>
       <td>${data.total.toFixed(2)} €</td>
     `;
@@ -97,12 +106,38 @@ $clients = $result['clients'] ?? [];
   // Слушаем изменения всех редактируемых ячеек
   document.querySelectorAll("#spedizione td[data-chat_id]").forEach(cell => {
     cell.setAttribute("contenteditable", true);
+
     cell.addEventListener("blur", () => {
+      const value = cell.innerText.trim();
+      const type = cell.dataset.type;
+      const chat_id = cell.dataset.chat_id;
+
+      // Обновляем текущую ячейку
       cell.classList.add("changed");
 
-      const newContent = cell.innerText.trim();
-      apiRequest(cell.dataset.chat_id, newContent, cell.dataset.type);
+      // Если это KG, то нужно:
+      if (type === "kg") {
+        // 1. Посчитать количество значений (Colli = число элементов)
+        const colliCount = value.split("+").map(v => v.trim()).filter(v => v).length;
 
+        // 2. Найти соседнюю ячейку "COLLI"
+        const row = cell.parentElement;
+        const colliCell = row.querySelector('td[data-type="count"]');
+
+        if (colliCell) {
+          colliCell.innerText = colliCount;
+          colliCell.classList.add("changed");
+
+          let colliToServe = (!colliCount) ? '' : colliCount;
+          // 3. Отправить обновление и для COLLI
+          apiRequest(chat_id, colliToServe, "count");
+        }
+      }
+
+      // Отправить текущее значение
+      apiRequest(chat_id, value, type);
+
+      // Обновить общие итоги
       updateSpedizioneTotals();
     });
   });
