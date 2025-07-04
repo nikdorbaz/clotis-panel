@@ -10,6 +10,7 @@ foreach ($quantities as $q) {
 }
 
 $clientsCount = count($clients);
+
 ?>
 
 <table class="spreadsheet" id="ordini">
@@ -61,7 +62,6 @@ $clientsCount = count($clients);
             'actually' => ''
           ];
 
-
           $value    = (int)$entry['value'];
           $booked   = (int)$entry['booked'];
           $actually = $entry['actually'];
@@ -78,6 +78,7 @@ $clientsCount = count($clients);
               $text .= ' + Booking ' . $booked;
             }
           }
+
           ?>
           <td
             data-product_id="<?= $pid ?>"
@@ -86,8 +87,8 @@ $clientsCount = count($clients);
             data-booked="<?= esc($booked) ?>"
             data-actually="<?= esc($actually) ?>"
             data-cell="true"
-            class="<?= ($actually) ? "changed" : "" ?>"
-            <?= empty($text) ? "" : "contenteditable" ?>><?= esc($text) ?></td>
+            class="<?= ($actually !== '') ? "changed" : "" ?>"
+            <?= ($text === '') ? "" : "contenteditable" ?>><?= esc($text) ?></td>
         <?php endforeach; ?>
       </tr>
     <?php endforeach; ?>
@@ -136,7 +137,7 @@ $clientsCount = count($clients);
         if (!isNaN(value)) sum += value;
       }
 
-      cells[totalColIndex].textContent = sum;
+      cells[totalColIndex].textContent = sum.toFixed(2);
 
       // динамический пересчёт
       for (let i = startDataColIndex; i < cells.length; i++) {
@@ -149,18 +150,15 @@ $clientsCount = count($clients);
             let val = 0;
 
             if (type === "booking") {
-              const m =
-                targetCell.textContent.match(
-                  /\+\s*Booking\s*(\d+)/i
-                );
-              if (m) val = parseFloat(m[1]);
+              const m = targetCell.textContent.match(/\+\s*Booking\s*(\d+)/i);
+              if (m) val = parseFloat(m[1].replace(',', '.'));
             } else {
-              val = parseFloat(targetCell.textContent);
+              val = parseFloat(targetCell.textContent.replace(',', '.'));
             }
 
             if (!isNaN(val)) newSum += val;
           }
-          cells[totalColIndex].textContent = newSum;
+          cells[totalColIndex].textContent = newSum.toFixed(2);
         };
 
         cell.addEventListener("input", recalculateSum);

@@ -118,7 +118,7 @@ $monthName = $result['month'] ?? "";
       <input type="hidden" name="cellCol" id="cellCol">
 
       <label for="amount">Сумма:</label>
-      <input type="number" id="amount" name="amount" required>
+      <input type="text" inputmode="decimal" pattern="^\d+(,\d{0,2})?$" id="amount" name="amount" required>
 
       <label for="date">Комментарий:</label>
       <input type="text" id="comment" name="comment">
@@ -144,7 +144,7 @@ $monthName = $result['month'] ?? "";
       <input type="text" id="text_id" name="text_id" required>
 
       <label for="amount">Сумма скидки:</label>
-      <input type="number" id="amount" name="amount" required>
+      <input type="text" inputmode="decimal" pattern="^\d+(,\d{0,2})?$" id="amount" name="amount" required>
 
       <button type="submit">Сохранить</button>
     </form>
@@ -161,7 +161,7 @@ $monthName = $result['month'] ?? "";
       <input type="hidden" name="cellCol" id="cellCol">
 
       <label for="amount">Сумма:</label>
-      <input type="number" id="amount" name="amount" required>
+      <input type="text" inputmode="decimal" pattern="^\d+(,\d{0,2})?$" id="amount" name="amount" required>
 
       <label for="date">Дата:</label>
       <input type="date" id="date" name="date" required>
@@ -184,7 +184,7 @@ $monthName = $result['month'] ?? "";
       <input type="text" id="text_id" name="text_id" required>
 
       <label for="amount">Сумма:</label>
-      <input type="number" id="amount" name="amount" required>
+      <input type="text" inputmode="decimal" pattern="^\d+(,\d{0,2})?$" id="amount" name="amount" required>
 
       <button type="submit">Сохранить</button>
     </form>
@@ -204,7 +204,7 @@ $monthName = $result['month'] ?? "";
       <input type="text" id="text_id" name="text_id" required>
 
       <label for="amount">Сумма:</label>
-      <input type="number" id="amount" name="amount" required>
+      <input type="text" inputmode="decimal" pattern="^\d+(,\d{0,2})?$" id="amount" name="amount" required>
 
       <button type="submit">Сохранить</button>
     </form>
