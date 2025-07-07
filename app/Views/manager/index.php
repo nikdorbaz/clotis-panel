@@ -76,6 +76,7 @@ $monthName = $result['month'] ?? "";
                   data-amount="<?= $t['amount'] ?? '' ?>"
                   data-date="<?= $t['date'] ?? '' ?>"
                   data-comment="<?= esc($t['comment'] ?? '') ?>"
+                  data-text_id="<?= esc($t['text_id'] ?? '') ?>"
                   data-i="<?= $i ?>"
                   data-j="<?= $j ?>"
                   id="payment_<?= $t['id'] ?>">
@@ -116,6 +117,9 @@ $monthName = $result['month'] ?? "";
       <input type="hidden" name="is_new" id="isNew">
       <input type="hidden" name="cellRow" id="cellRow">
       <input type="hidden" name="cellCol" id="cellCol">
+
+      <label for="date">ID:</label>
+      <input type="text" id="text_id" name="text_id">
 
       <label for="amount">Сумма:</label>
       <input type="text" inputmode="decimal" pattern="^\d+(,\d{0,2})?$" id="amount" name="amount" required>
@@ -186,6 +190,12 @@ $monthName = $result['month'] ?? "";
       <label for="amount">Сумма:</label>
       <input type="text" inputmode="decimal" pattern="^\d+(,\d{0,2})?$" id="amount" name="amount" required>
 
+      <label for="date">Комментарий:</label>
+      <input type="text" id="comment" name="comment">
+
+      <label for="date">Дата:</label>
+      <input type="date" id="date" name="date" required>
+
       <button type="submit">Сохранить</button>
     </form>
   </div>
@@ -205,6 +215,12 @@ $monthName = $result['month'] ?? "";
 
       <label for="amount">Сумма:</label>
       <input type="text" inputmode="decimal" pattern="^\d+(,\d{0,2})?$" id="amount" name="amount" required>
+
+      <label for="date">Комментарий:</label>
+      <input type="text" id="comment" name="comment">
+
+      <label for="date">Дата:</label>
+      <input type="date" id="date" name="date" required>
 
       <button type="submit">Сохранить</button>
     </form>
@@ -353,7 +369,7 @@ $monthName = $result['month'] ?? "";
   let currentStockId = null;
   let currentChatId = null;
 
-  function openModal(i, j, amount = '', date = '', paymentId = null, stockId = null, chatId = null, comment = '', type = "payment") {
+  function openModal(i, j, amount = '', date = '', paymentId = null, stockId = null, chatId = null, comment = '', text_id = '', type = "payment") {
     modalType = type;
 
     const table = document.getElementById("sales");
@@ -375,7 +391,7 @@ $monthName = $result['month'] ?? "";
     if (form.querySelector("#amount")) form.querySelector("#amount").value = amount;
     if (form.querySelector("#date")) form.querySelector("#date").value = date || "<?= date('Y-m-d') ?>";
     if (form.querySelector("#comment")) form.querySelector("#comment").value = comment || '';
-    if (form.querySelector("#text_id")) form.querySelector("#text_id").value = '';
+    if (form.querySelector("#text_id")) form.querySelector("#text_id").value = text_id || '';
 
     currentPaymentId = paymentId;
     currentStockId = stockId;
@@ -418,6 +434,8 @@ $monthName = $result['month'] ?? "";
         case "overpay":
           payload.amount = form.amount.value;
           payload.text_id = form.text_id.value;
+          payload.comment = form.comment.value;
+          payload.date = form.date.value;
           break;
       }
 
@@ -483,7 +501,7 @@ $monthName = $result['month'] ?? "";
 
             cell.prepend(span);
 
-            span.addEventListener('click', () => openModal(row, col, payload.amount || '', payload.date || '', data.id, currentStockId, currentChatId, payload.comment || '', modalType));
+            span.addEventListener('click', () => openModal(row, col, payload.amount || '', payload.date || '', data.id, currentStockId, currentChatId, payload.comment || '', payload.text_id, modalType));
           } else {
             const existing = document.getElementById(`payment_${currentPaymentId}`);
             if (existing) {
@@ -513,13 +531,14 @@ $monthName = $result['month'] ?? "";
     const i = el.dataset.i;
     const j = el.dataset.j;
     const amount = el.dataset.amount;
+    const text_id = el.dataset.text_id;
     const date = el.dataset.date;
     const comment = el.dataset.comment ?? '';
     const paymentId = el.dataset.id;
     const stockId = el.closest('td').dataset.stockId;
     const chatId = chatIds[i];
 
-    el.addEventListener('click', () => openModal(i, j, amount, date, paymentId, stockId, chatId, comment, 'payment'));
+    el.addEventListener('click', () => openModal(i, j, amount, date, paymentId, stockId, chatId, comment, text_id, 'payment'));
   });
 
   // обработка добавления нового платежа
@@ -530,7 +549,7 @@ $monthName = $result['month'] ?? "";
       const stockId = el.dataset.stockId;
       const chatId = chatIds[i];
       const type = cls.replace("add-", "");
-      el.addEventListener("click", () => openModal(i, j, '', '', null, stockId, chatId, '', type));
+      el.addEventListener("click", () => openModal(i, j, '', '', null, stockId, chatId, '', '', type));
     });
   });
 
