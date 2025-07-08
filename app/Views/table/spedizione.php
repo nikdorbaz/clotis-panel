@@ -134,8 +134,10 @@ $clients = $result['clients'] ?? [];
         }
       }
 
-      // Отправить текущее значение
-      apiRequest(chat_id, value, type);
+      setTimeout(() => {
+        // Отправить текущее значение
+        apiRequest(chat_id, value, type);
+      }, 500);
 
       // Обновить общие итоги
       updateSpedizioneTotals();
