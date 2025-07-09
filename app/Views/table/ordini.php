@@ -88,7 +88,7 @@ $clientsCount = count($clients);
             data-actually="<?= esc($actually) ?>"
             data-cell="true"
             class="<?= ($actually !== '') ? "changed" : "" ?>"
-            <?= ($text === '') ? "" : "contenteditable" ?>><?= esc($text) ?></td>
+            <?= ($text === '' || service('uri')->getSegment(2) == 'history')  ? "" : "contenteditable" ?>><?= esc($text) ?></td>
         <?php endforeach; ?>
       </tr>
     <?php endforeach; ?>

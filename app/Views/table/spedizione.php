@@ -58,7 +58,7 @@ $clients = $result['clients'] ?? [];
   const parseKgValue = (str) => {
     return str
       .split("+")
-      .map(v => parseFloat(v.trim()) || 0)
+      .map(v => parseNumber(v.trim()))
       .reduce((a, b) => a + b, 0);
   };
 
@@ -70,8 +70,8 @@ $clients = $result['clients'] ?? [];
       const cells = row.querySelectorAll("td");
       const country = cells[2]?.textContent.trim();
       const kgStr = cells[3]?.textContent || "";
-      const colli = parseFloat(cells[4]?.textContent) || 0;
-      const total = parseFloat(cells[5]?.textContent.replace('€', '').trim()) || 0;
+      const colli = parseNumber(cells[4]?.textContent || 0);
+      const total = parseNumber(cells[5]?.textContent || 0);
 
       const kg = parseKgValue(kgStr);
 
@@ -105,7 +105,9 @@ $clients = $result['clients'] ?? [];
 
   // Слушаем изменения всех редактируемых ячеек
   document.querySelectorAll("#spedizione td[data-chat_id]").forEach(cell => {
-    cell.setAttribute("contenteditable", true);
+    <? if (service('uri')->getSegment(2) != 'history'): ?>
+      cell.setAttribute("contenteditable", true);
+    <? endif; ?>
 
     cell.addEventListener("blur", () => {
       const value = cell.innerText.trim();
@@ -162,6 +164,19 @@ $clients = $result['clients'] ?? [];
 
     xhr.send(formData);
   };
+
+  function parseNumber(str) {
+    if (!str) return 0;
+    str = str.replace(',', '.').replace(/[^\d.]/g, '');
+    const val = parseFloat(str);
+    return isNaN(val) ? 0 : val;
+  }
+
+  function sumKgString(value) {
+    return value.split('+')
+      .map(v => parseKgValue(v.trim()))
+      .reduce((a, b) => a + b, 0);
+  }
 </script>
 
 

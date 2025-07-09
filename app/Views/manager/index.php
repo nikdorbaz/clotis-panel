@@ -79,13 +79,14 @@ $monthName = $result['month'] ?? "";
                   data-text_id="<?= esc($t['text_id'] ?? '') ?>"
                   data-i="<?= $i ?>"
                   data-j="<?= $j ?>"
+                  data-type="<?= esc($t['type']); ?>"
                   id="payment_<?= $t['id'] ?>">
                   <?php if ($type === 'defect'): ?>
-                    Дефект: <?= esc($t['text_id']) ?>, -<?= $t['amount'] ?> €
+                    Дефект: <?= esc($t['text_id']) ?>, - <?= $t['amount'] ?> €
                   <?php elseif ($type === 'debt'): ?>
-                    Долг: <?= esc($t['text_id']) ?>, <?= $t['date'] ?>
+                    Долг: <?= esc($t['text_id']) ?>, <?= $t['date'] ?>, <?= $t['amount'] ?> € <span><?= $t['comment'] ?></span>
                   <?php elseif ($type === 'overpay'): ?>
-                    Переплата: <?= esc($t['text_id']) ?>, <?= $t['date'] ?>
+                    Переплата: <?= esc($t['text_id']) ?>, <?= $t['date'] ?> - <?= $t['amount'] ?> €
                   <?php elseif ($type === 'card'): ?>
                     <?= $t['amount'] ?> € / <?= $t['date'] ?>
                   <?php endif; ?>
@@ -122,7 +123,7 @@ $monthName = $result['month'] ?? "";
       <input type="text" id="text_id" name="text_id">
 
       <label for="amount">Сумма:</label>
-      <input type="text" inputmode="decimal" pattern="^\d+(,\d{0,2})?$" id="amount" name="amount" required>
+      <input type="text" inputmode="decimal" pattern="^\d+([.,]\d{0,2})?$" id="amount" name="amount" required>
 
       <label for="date">Комментарий:</label>
       <input type="text" id="comment" name="comment">
@@ -148,7 +149,7 @@ $monthName = $result['month'] ?? "";
       <input type="text" id="text_id" name="text_id" required>
 
       <label for="amount">Сумма скидки:</label>
-      <input type="text" inputmode="decimal" pattern="^\d+(,\d{0,2})?$" id="amount" name="amount" required>
+      <input type="text" inputmode="decimal" pattern="^\d+([.,]\d{0,2})?$" id="amount" name="amount" required>
 
       <button type="submit">Сохранить</button>
     </form>
@@ -165,7 +166,7 @@ $monthName = $result['month'] ?? "";
       <input type="hidden" name="cellCol" id="cellCol">
 
       <label for="amount">Сумма:</label>
-      <input type="text" inputmode="decimal" pattern="^\d+(,\d{0,2})?$" id="amount" name="amount" required>
+      <input type="text" inputmode="decimal" pattern="^\d+([.,]\d{0,2})?$" id="amount" name="amount" required>
 
       <label for="date">Дата:</label>
       <input type="date" id="date" name="date" required>
@@ -188,7 +189,7 @@ $monthName = $result['month'] ?? "";
       <input type="text" id="text_id" name="text_id" required>
 
       <label for="amount">Сумма:</label>
-      <input type="text" inputmode="decimal" pattern="^\d+(,\d{0,2})?$" id="amount" name="amount" required>
+      <input type="text" inputmode="decimal" pattern="^\d+([.,]\d{0,2})?$" id="amount" name="amount" required>
 
       <label for="date">Комментарий:</label>
       <input type="text" id="comment" name="comment">
@@ -214,7 +215,7 @@ $monthName = $result['month'] ?? "";
       <input type="text" id="text_id" name="text_id" required>
 
       <label for="amount">Сумма:</label>
-      <input type="text" inputmode="decimal" pattern="^\d+(,\d{0,2})?$" id="amount" name="amount" required>
+      <input type="text" inputmode="decimal" pattern="^\d+([.,]\d{0,2})?$" id="amount" name="amount" required>
 
       <label for="date">Комментарий:</label>
       <input type="text" id="comment" name="comment">
@@ -424,17 +425,19 @@ $monthName = $result['month'] ?? "";
         case "card":
           payload.amount = form.amount.value;
           payload.date = form.date.value;
+          payload.text_id = form.text_id.value;
           payload.comment = form.comment?.value || '';
           break;
         case "defect":
           payload.text_id = form.text_id.value;
           payload.amount = form.amount.value;
+          payload.comment = form.comment?.value || '';
           break;
         case "debt":
         case "overpay":
           payload.amount = form.amount.value;
           payload.text_id = form.text_id.value;
-          payload.comment = form.comment.value;
+          payload.comment = form.comment?.value || '';
           payload.date = form.date.value;
           break;
       }
@@ -475,6 +478,7 @@ $monthName = $result['month'] ?? "";
             span.dataset.i = row;
             span.dataset.j = col;
 
+            console.log(modalType);
             if (modalType === 'payment' || modalType === 'card') {
               span.innerText = `${payload.amount} € / ${payload.date}`;
             } else if (modalType === 'defect') {
@@ -504,11 +508,18 @@ $monthName = $result['month'] ?? "";
             span.addEventListener('click', () => openModal(row, col, payload.amount || '', payload.date || '', data.id, currentStockId, currentChatId, payload.comment || '', payload.text_id, modalType));
           } else {
             const existing = document.getElementById(`payment_${currentPaymentId}`);
+
             if (existing) {
-              existing.innerText = `${payload.amount} € / ${payload.date}`;
               existing.dataset.amount = payload.amount;
               existing.dataset.date = payload.date;
               existing.dataset.comment = payload.comment;
+              existing.dataset.text_id = payload.text_id;
+            }
+
+            if (existing.dataset.type) {
+              existing.innerText = `Долг: ${payload.text_id}, ${payload.date}, ${payload.amount} ${payload.comment}`;
+            } else {
+              existing.innerText = `${payload.amount} € / ${payload.date}`;
             }
           }
 
@@ -528,17 +539,19 @@ $monthName = $result['month'] ?? "";
 
   // обработка кликов по существующим платежам
   document.querySelectorAll('.cell-item').forEach((el) => {
-    const i = el.dataset.i;
-    const j = el.dataset.j;
-    const amount = el.dataset.amount;
-    const text_id = el.dataset.text_id;
-    const date = el.dataset.date;
-    const comment = el.dataset.comment ?? '';
-    const paymentId = el.dataset.id;
-    const stockId = el.closest('td').dataset.stockId;
-    const chatId = chatIds[i];
+    el.addEventListener('click', () => {
+      const i = el.dataset.i;
+      const j = el.dataset.j;
+      const amount = el.dataset.amount;
+      const text_id = el.dataset.text_id;
+      const date = el.dataset.date;
+      const comment = el.dataset.comment ?? '';
+      const paymentId = el.dataset.id;
+      const stockId = el.closest('td')?.dataset.stockId;
+      const chatId = chatIds[i];
 
-    el.addEventListener('click', () => openModal(i, j, amount, date, paymentId, stockId, chatId, comment, text_id, 'payment'));
+      openModal(i, j, amount, date, paymentId, stockId, chatId, comment, text_id, 'payment');
+    });
   });
 
   // обработка добавления нового платежа
@@ -597,3 +610,12 @@ $monthName = $result['month'] ?? "";
     }
   }
 </script>
+
+
+<!--
+Залишок повинен відніматися
+Переплата відніматися
+
+Борг повинен додаватися
+Карта повинен додаватися
+-->
