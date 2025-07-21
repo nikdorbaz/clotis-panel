@@ -34,13 +34,13 @@ $clientsCount = count($clients);
       <td class="fixed-col"></td>
       <td class="fixed-col"></td>
       <?php foreach ($clients as $client): ?>
-        <td><?= esc($client['country']) ?></td>
+        <td><?= esc($client['country'] ?? "") ?></td>
       <?php endforeach; ?>
     </tr>
     <tr class="fixed-row">
       <td colspan="6" class="fixed-col">Note</td>
       <?php foreach ($clients as $client): ?>
-        <td><?= esc($client['note']); ?></td>
+        <td><?= esc($client['note'] ?? ""); ?></td>
       <?php endforeach; ?>
     </tr>
     <?php foreach ($products as $product): ?>

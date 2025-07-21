@@ -20,7 +20,7 @@ $clients = $result['clients'] ?? [];
       <tr>
         <td>#</td>
         <td><?= esc($client['uniq_id']) ?></td>
-        <td><?= esc($client['country']) ?></td>
+        <td><?= esc($client['country'] ?? "") ?></td>
         <td data-chat_id="<?= $client['chat_id'] ?>" data-type="kg" class="<?= !empty($client['kg']) ? "changed" : "" ?>">
           <?= $client['kg'] ?? "" ?>
         </td>

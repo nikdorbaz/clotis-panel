@@ -41,7 +41,9 @@
         История версий
       </div>
       <ul>
-
+        <? foreach ($months as $month): ?>
+          <li><a href="<?= base_url("manager/history/$month?type=" . $type) ?>" class="<?= ($month == $currentMonth) ? 'active' : '' ?>">Просмотреть версию за <?= $month ?></span></a></li>
+        <? endforeach; ?>
       </ul>
     </div>
   </div>

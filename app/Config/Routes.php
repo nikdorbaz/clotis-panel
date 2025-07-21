@@ -19,4 +19,5 @@ $routes->group('manager', static function ($routes) {
   $routes->add('/', 'Manager::index');
   $routes->add('monthly', 'Manager::monthly');
   $routes->add('difference', 'Manager::difference');
+  $routes->add('history/(:segment)', 'Manager::history/$1');
 });

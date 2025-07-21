@@ -425,7 +425,7 @@ $monthName = $result['month'] ?? "";
         case "card":
           payload.amount = form.amount.value;
           payload.date = form.date.value;
-          payload.text_id = form.text_id.value;
+          payload.text_id = form.text_id?.value || '';
           payload.comment = form.comment?.value || '';
           break;
         case "defect":
