@@ -4,7 +4,7 @@ namespace App\Controllers;
 
 class Stock extends BaseController
 {
-  public function index()
+  public function ordini()
   {
     $stock = session('stock');
 
@@ -18,34 +18,55 @@ class Stock extends BaseController
     timer('apiRequest');
 
     $id = $stock['id'];
+    $type = 'ordini';
 
     try {
-      $type = $this->request->getGet('type') ?? "ordini";
+      $result = service('ApiHelper')->setParams([
+        'id' => $id
+      ])->setMethod('api/v1/stock/getOrdini')->getResult();
 
-      if ($type == 'spedizione') {
-        $result = service('ApiHelper')->setParams([
-          'id' => $id
-        ])->setMethod('api/v1/stock/getSpedizione')->getResult();
-      } elseif ($type == 'ordini') {
-        $result = service('ApiHelper')->setParams([
-          'id' => $id
-        ])->setMethod('api/v1/stock/getOrdini')->getResult();
-      }
-
-      $months = service('ApiHelper')->setParams([
-        'id' => $id,
-        'type' => $type,
-      ])->setMethod('api/v1/stock/historyMonths')->getResult();
+      $campaigns = service('ApiHelper')->setMethod('api/v1/campaign/get')->getResult();
 
       timer()->stop('apiRequest');
     } catch (\Exception $e) {
       $error = $e->getMessage();
     }
 
-    return view('table/index', ['result' => $result, 'error' => $error, 'stock' => $stock, 'type' => $type, 'months' => $months]);
+    return view('table/index', ['result' => $result, 'error' => $error, 'stock' => $stock, 'type' => $type, 'campaigns' => $campaigns, 'campaign' => '']);
   }
 
-  public function history($month)
+  public function spedizione()
+  {
+    $stock = session('stock');
+
+    if (is_null($stock)) {
+      return redirect()->to('/');
+    }
+
+    $result = null;
+    $error = null;
+
+    timer('apiRequest');
+
+    $id = $stock['id'];
+    $type = 'spedizione';
+
+    try {
+      $result = service('ApiHelper')->setParams([
+        'id' => $id
+      ])->setMethod('api/v1/stock/getSpedizione')->getResult();
+
+      $campaigns = service('ApiHelper')->setMethod('api/v1/campaign/get')->getResult();
+
+      timer()->stop('apiRequest');
+    } catch (\Exception $e) {
+      $error = $e->getMessage();
+    }
+
+    return view('table/index', ['result' => $result, 'error' => $error, 'stock' => $stock, 'type' => $type, 'campaigns' => $campaigns, 'campaign' => '']);
+  }
+
+  public function ordiniByCampaign($campaign)
   {
     try {
       $stock = session('stock');
@@ -55,27 +76,50 @@ class Stock extends BaseController
 
       $stockId = $stock['id'];
       $name    = $stock['name'];
+      $error  = null;
 
       // Тип можно передавать через GET ?type=ordini, по умолчанию 'ordini'
-      $type = $this->request->getGet('type') ?? 'ordini';
+      $type = 'ordini';
 
       $result = service('ApiHelper')->setParams([
         'id'    => $stockId,
-        'type'  => $type,
-        'month' => $month
-      ])->setMethod('api/v1/stock/getHistory')->getResult();
+        'campaign_id' => $campaign,
+      ])->setMethod('api/v1/stock/getOrdiniByCampaign')->getResult();
 
-      $months = service('ApiHelper')->setParams([
-        'id' => $stockId,
-        'type' => $type,
-      ])->setMethod('api/v1/stock/historyMonths')->getResult();
-
-      return view('table/index', ['result' => $result, 'name' => $name, 'type' => $type, 'months' => $months, 'stock' => $stock]);
+      $campaigns = service('ApiHelper')->setMethod('api/v1/campaign/get')->getResult();
     } catch (\Exception $e) {
-      return redirect()->to('stock');
+      $error = $e->getMessage();
     }
 
-    return view('table/index', ['result' => $result, 'name' => $name ?? "", 'type' => 'ordini']);
+    return view('table/index', ['result' => $result, 'error' => $error, 'stock' => $stock, 'type' => $type, 'campaigns' => $campaigns, 'campaign' => $campaign]);
+  }
+
+  public function spedizioneByCampaign($campaign)
+  {
+    try {
+      $stock = session('stock');
+      if (is_null($stock)) {
+        return redirect()->to('/');
+      }
+
+      $stockId = $stock['id'];
+      $name    = $stock['name'];
+      $error  = null;
+
+      // Тип можно передавать через GET ?type=ordini, по умолчанию 'ordini'
+      $type = 'spedizione';
+
+      $result = service('ApiHelper')->setParams([
+        'id'    => $stockId,
+        'campaign_id' => $campaign,
+      ])->setMethod('api/v1/stock/getSpedizioneByCampaign')->getResult();
+
+      $campaigns = service('ApiHelper')->setMethod('api/v1/campaign/get')->getResult();
+    } catch (\Exception $e) {
+      $error = $e->getMessage();
+    }
+
+    return view('table/index', ['result' => $result, 'error' => $error, 'stock' => $stock, 'type' => $type, 'campaigns' => $campaigns, 'campaign' => $campaign]);
   }
 
   public function tableData()

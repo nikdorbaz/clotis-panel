@@ -16,7 +16,7 @@ $clientsCount = count($clients);
 <table class="spreadsheet" id="ordini">
   <tbody>
     <tr class="fixed-row">
-      <td class="fixed-col"></td>
+      <td class="fixed-col"><input type="text" placeholder="Поиск..." data-row-index="0"></td>
       <td class="fixed-col">Art.</td>
       <td class="fixed-col">Totale metri ordinati</td>
       <td class="fixed-col">Totale metri prenotati</td>
@@ -44,8 +44,27 @@ $clientsCount = count($clients);
       <?php endforeach; ?>
     </tr>
     <?php foreach ($products as $product): ?>
+      <?php
+      $files = json_decode($product['files'], true);
+      $firstImg = '';
+
+      if (!empty($files)) {
+        foreach ($files as $file) {
+          // проверяем, что это картинка
+          if (preg_match('/\.(jpe?g|png|gif|webp)$/i', $file)) {
+            $firstImg = $file;
+            break;
+          }
+        }
+      }
+      ?>
       <tr>
-        <td class="fixed-col"><?= esc($product['name']) ?></td>
+        <td class="fixed-col">
+          <div class="tooltip-img"
+            data-img="<?= esc($firstImg) ?>">
+            <?= esc($product['name']) ?>
+          </div>
+        </td>
         <td class="fixed-col"><?= esc($product['sku']) ?></td>
         <td class="fixed-col"></td>
         <td class="fixed-col"></td>
@@ -88,7 +107,7 @@ $clientsCount = count($clients);
             data-actually="<?= esc($actually) ?>"
             data-cell="true"
             class="<?= ($actually !== '') ? "changed" : "" ?>"
-            <?= ($text === '' || service('uri')->getSegment(2) == 'history')  ? "" : "contenteditable" ?>><?= esc($text) ?></td>
+            <?= ($text === '' || !empty($campaign))  ? "" : "contenteditable" ?>><?= esc($text) ?></td>
         <?php endforeach; ?>
       </tr>
     <?php endforeach; ?>
@@ -99,6 +118,21 @@ $clientsCount = count($clients);
   .fixed-row,
   .fixed-col {
     position: sticky;
+  }
+
+  .tooltip-img {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+  }
+
+  .tooltip-preview {
+    position: fixed;
+    max-width: 200px;
+    border: 1px solid #ccc;
+    background: #fff;
+    padding: 5px;
+    z-index: 100;
   }
 </style>
 
@@ -184,7 +218,7 @@ $clientsCount = count($clients);
   }
 
   const apiRequest = async (product_id, client_id, value) => {
-    let url = "https://clotiss.site/api/v1/update/actually";
+    let url = "<?= getenv('API_URL') ?>/api/v1/update/actually";
     const xhr = new XMLHttpRequest();
     const formData = new FormData();
 
@@ -236,6 +270,86 @@ $clientsCount = count($clients);
         });
       });
     });
+
+    document.querySelectorAll('input[data-row-index]').forEach(input => {
+      input.addEventListener('input', function() {
+        const searchValue = this.value.trim().toLowerCase();
+
+        const table = document.querySelector("#ordini");
+        const rows = Array.from(table.querySelectorAll("tbody tr"));
+
+        // Первый (нулевой) ряд — заголовки клиентов
+        const headerRow = rows[0];
+        const headerCells = headerRow.querySelectorAll('td');
+
+        // Найдём индекс столбца клиента по заголовку
+        let targetClientColIndex = -1;
+
+        headerCells.forEach((cell, index) => {
+          const cellText = cell.textContent.trim().toLowerCase();
+          if (cellText.includes(searchValue) && index >= 6) {
+            targetClientColIndex = index;
+          }
+        });
+
+        // Если ничего не найдено, показать всё и выйти
+        if (!searchValue || targetClientColIndex === -1) {
+          rows.forEach(row => {
+            row.style.display = '';
+            row.querySelectorAll('td').forEach(cell => {
+              cell.style.display = '';
+            });
+          });
+          return;
+        }
+
+        rows.forEach((row, rowIndex) => {
+          const cells = row.querySelectorAll('td');
+
+          // 1. Всегда показываем первые 3 строки (фильтры/заголовки/примечания)
+          if (rowIndex < 3) {
+            row.style.display = '';
+
+            let currentColIndex = 0;
+
+            cells.forEach((cell, cellIndex) => {
+              const span = parseInt(cell.getAttribute("colspan") || "1");
+              // Показываем только нужный столбец клиента и фиксированные столбцы (0-5)
+              if (currentColIndex <= 5 || currentColIndex === targetClientColIndex) {
+                cell.style.display = '';
+              } else {
+                cell.style.display = 'none';
+              }
+              currentColIndex += span;
+            });
+            return;
+          }
+
+          // 2. Обработка остальных строк (с данными)
+          if (targetClientColIndex < cells.length) {
+            const clientCell = cells[targetClientColIndex];
+            const clientValue = clientCell.textContent.trim();
+
+            // Если значение пустое — скрываем строку
+            if (!clientValue) {
+              row.style.display = 'none';
+            } else {
+              row.style.display = '';
+            }
+
+            // Показываем только нужный столбец клиента и фиксированные (0-5)
+            cells.forEach((cell, cellIndex) => {
+              if (cellIndex <= 5 || cellIndex === targetClientColIndex) {
+                cell.style.display = '';
+              } else {
+                cell.style.display = 'none';
+              }
+            });
+          }
+        });
+      });
+    });
+
   });
 
   function fixColumnWidths(tableId) {
@@ -256,4 +370,30 @@ $clientsCount = count($clients);
       });
     });
   }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const preview = document.createElement('img');
+    preview.className = 'tooltip-preview';
+    document.body.appendChild(preview);
+
+    document.querySelectorAll('.tooltip-img').forEach(el => {
+      el.addEventListener('mouseenter', (e) => {
+        const src = el.dataset.img;
+        if (src) {
+          preview.src = src;
+          preview.style.display = 'block';
+          positionPreview(e);
+        }
+      });
+      el.addEventListener('mousemove', positionPreview);
+      el.addEventListener('mouseleave', () => {
+        preview.style.display = 'none';
+      });
+    });
+
+    function positionPreview(e) {
+      preview.style.top = (e.clientY + 15) + 'px';
+      preview.style.left = (e.clientX + 15) + 'px';
+    }
+  });
 </script>

@@ -31,21 +31,26 @@
         Таблица
       </div>
       <ul>
-        <li><a href="<?= base_url('manager') ?>" class="<?= service('uri')->getSegment(2) === '' ? 'active' : '' ?>">Оплаты</a></li>
+        <li><a href="<?= base_url('manager/payments') ?>" class="<?= (service('uri')->getSegment(2) === 'payments' && empty($campaign)) ? 'active' : '' ?>">Оплаты</a></li>
         <li><a href="<?= base_url('manager/monthly') ?>" class="<?= service('uri')->getSegment(2) === 'monthly' ? 'active' : '' ?>">Оплата по месяцам</a></li>
-        <li><a href="<?= base_url('manager/difference') ?>" class="<?= service('uri')->getSegment(2) === 'difference' ? 'active' : '' ?>">Таблица разницы</a></li>
+        <li><a href="<?= base_url('manager/difference') ?>" class="<?= (service('uri')->getSegment(2) === 'difference' && empty($campaign)) ? 'active' : '' ?>">Таблица разницы</a></li>
       </ul>
     </div>
-    <div class="history-nav">
-      <div class="history-title">
-        История версий
+    <? if ($type != 'monthly'): ?>
+      <div class="history-nav">
+        <div class="history-title">
+          История версий
+        </div>
+        <ul>
+          <? foreach ($campaigns as $one): ?>
+            <? if ($one['status'] == 'active') {
+              continue;
+            } ?>
+            <li><a href="<?= base_url("manager/$type/campaign/" . $one['id']) ?>" class="<?= ($one['id'] == $campaign) ? "active" : "" ?>">Просмотреть версию за <?= $one['title'] ?></span></a></li>
+          <? endforeach; ?>
+        </ul>
       </div>
-      <ul>
-        <? foreach ($months as $month): ?>
-          <li><a href="<?= base_url("manager/history/$month?type=" . $type) ?>" class="<?= ($month == $currentMonth) ? 'active' : '' ?>">Просмотреть версию за <?= $month ?></span></a></li>
-        <? endforeach; ?>
-      </ul>
-    </div>
+    <? endif; ?>
   </div>
 </div>
 
@@ -158,6 +163,12 @@
   .history-content li a {
     color: #343a40;
     text-decoration: none;
+  }
+
+  .history-content li a.active {
+    font-weight: bold;
+    color: #007bff;
+    text-decoration: underline;
   }
 
   .history-date {

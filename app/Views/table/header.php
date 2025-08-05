@@ -1,3 +1,15 @@
+<?
+
+$activeCampaign = null;
+
+foreach ($campaigns as $one) {
+  if ($one['id'] == $campaign) {
+    $activeCampaign = $one;
+  }
+}
+
+?>
+
 <header>
 
   <div class="stock-info">
@@ -11,8 +23,8 @@
 
   <div class="controls">
     <button type="button" class="history-button" onclick="toggleHistory()">
-      <? if (service('uri')->getSegment(2) == 'history'): ?>
-        Заказы за <?= service('uri')->getSegment(3); ?>
+      <? if (!is_null($activeCampaign)): ?>
+        Заказы за <?= $activeCampaign['title'] ?>
       <? else: ?>
         Актуальная версия
       <? endif; ?>
@@ -34,9 +46,12 @@
   </div>
   <div class="history-content">
     <ul>
-      <li><a href="<?= base_url("stock/?type=" . $type) ?>">Актуальная версия</span></a></li>
-      <? foreach ($months as $month): ?>
-        <li><a href="<?= base_url("stock/history/$month?type=" . $type) ?>">Просмотреть заказы <?= $month ?></span></a></li>
+      <li><a href="<?= base_url("stock/" . $type) ?>" class="<?= (empty($campaign)) ? "active" : "" ?>">Актуальная версия</span></a></li>
+      <? foreach ($campaigns as $one): ?>
+        <? if ($one['status'] == 'active') {
+          continue;
+        } ?>
+        <li><a href="<?= base_url("stock/$type/campaign/" . $one['id']) ?>" class="<?= ($one['id'] == $campaign) ? "active" : "" ?>">Просмотреть заказы <?= $one['title'] ?></span></a></li>
       <? endforeach; ?>
     </ul>
   </div>
@@ -150,6 +165,12 @@
   .history-content li a {
     color: #343a40;
     text-decoration: none;
+  }
+
+  .history-content li a.active {
+    font-weight: bold;
+    color: #007bff;
+    text-decoration: underline;
   }
 
   .history-date {

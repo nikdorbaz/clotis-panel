@@ -4,7 +4,7 @@ namespace App\Controllers;
 
 class Manager extends BaseController
 {
-  public function index()
+  public function payments()
   {
     $manager = session('manager');
 
@@ -20,64 +20,14 @@ class Manager extends BaseController
     try {
       $result = service('ApiHelper')->setParams([
         'id' => $id
-      ])->setMethod('api/v1/sales/get')->getResult();
+      ])->setMethod('api/v1/sales/getPayments')->getResult();
 
-      $months = service('ApiHelper')->setParams([
-        'id' => $id,
-        'type' => 'payments',
-      ])->setMethod('api/v1/sales/historyMonths')->getResult();
+      $campaigns = service('ApiHelper')->setMethod('api/v1/campaign/get')->getResult();
     } catch (\Exception $e) {
       $error = $e->getMessage();
     }
 
-    return view('manager/index', ['result' => $result, 'error' => $error, 'name' => $name, 'months' => $months, 'currentMonth' => '', 'type' => 'payments']);
-  }
-
-  public function history($month)
-  {
-    try {
-      $manager = session('manager');
-
-      if (is_null($manager)) {
-        return redirect()->to('/');
-      }
-
-      $id = $manager['id'];
-      $name = $manager['name'];
-      $error = null;
-
-      // Тип можно передавать через GET ?type=ordini, по умолчанию 'ordini'
-      $type = $this->request->getGet('type') ?? 'difference';
-
-      $result = service('ApiHelper')->setParams([
-        'type'  => $type,
-        'month' => $month
-      ])->setMethod('api/v1/sales/getHistory')->getResult();
-
-      $months = service('ApiHelper')->setParams([
-        'type' => $type,
-      ])->setMethod('api/v1/sales/historyMonths')->getResult();
-
-
-      if ($type == 'payments') {
-        return view('manager/index', ['result' => $result, 'error' => $error, 'name' => $name, 'months' => $months, 'currentMonth' => $month, 'type' => 'payments']);
-      } else {
-        return view('manager/difference', [
-          'result' => $result,
-          'error' => $error,
-          'name' => $name,
-          'stock_id' => $stockID ?? 0,
-          'months' => $months,
-          'currentMonth' => '',
-          'type' => 'difference'
-        ]);
-      }
-    } catch (\Exception $e) {
-      dd($e->getMessage());
-      return redirect()->to('manager');
-    }
-
-    return view('manager/index', ['result' => $result, 'name' => $name ?? "", 'type' => 'ordini']);
+    return view('manager/index', ['result' => $result, 'error' => $error, 'name' => $name, 'campaigns' => $campaigns, 'campaign' => '', 'type' => 'payments']);
   }
 
   public function monthly()
@@ -101,15 +51,12 @@ class Manager extends BaseController
         'stock_id' => $stockID,
       ])->setMethod('api/v1/sales/getByMonth')->getResult();
 
-      $months = service('ApiHelper')->setParams([
-        'id' => $id,
-        'type' => 'payments',
-      ])->setMethod('api/v1/sales/historyMonths')->getResult();
+      $campaigns = service('ApiHelper')->setMethod('api/v1/campaign/get')->getResult();
     } catch (\Exception $e) {
       $error = $e->getMessage();
     }
 
-    return view('manager/monthly', ['name' => $name, 'error' => $error, 'result' => $result, 'months' => $months, 'currentMonth' => '', 'type' => '']);
+    return view('manager/monthly', ['name' => $name, 'error' => $error, 'result' => $result, 'campaigns' => $campaigns, 'campaign' => '', 'type' => 'monthly']);
   }
 
   public function difference()
@@ -134,10 +81,7 @@ class Manager extends BaseController
         'stock_id' => $stockID,
       ])->setMethod('api/v1/sales/getDifference')->getResult();
 
-      $months = service('ApiHelper')->setParams([
-        'id' => $id,
-        'type' => 'payments',
-      ])->setMethod('api/v1/sales/historyMonths')->getResult();
+      $campaigns = service('ApiHelper')->setMethod('api/v1/campaign/get')->getResult();
 
       $api = [
         'difference' => 'https://clotiss.site/api/v1/sales/getDifference'
@@ -151,9 +95,73 @@ class Manager extends BaseController
       'error' => $error,
       'name' => $name,
       'stock_id' => $stockID,
-      'months' => $months,
-      'currentMonth' => '',
+      'campaigns' => $campaigns,
+      'campaign' => '',
       'api' => $api,
+      'type' => 'difference'
+    ]);
+  }
+
+  public function paymentsByCampaign(int $campaign)
+  {
+    $manager = session('manager');
+
+    if (is_null($manager)) {
+      return redirect()->to('/');
+    }
+
+    $result = null;
+    $error = null;
+
+    $id = $manager['id'];
+    $name = $manager['name'];
+    try {
+      $result = service('ApiHelper')->setParams([
+        'id' => $id,
+        'campaign' => $campaign
+      ])->setMethod('api/v1/sales/getPaymentsByCampaign')->getResult();
+
+      $campaigns = service('ApiHelper')->setMethod('api/v1/campaign/get')->getResult();
+    } catch (\Exception $e) {
+      $error = $e->getMessage();
+    }
+
+    return view('manager/index', ['result' => $result, 'error' => $error, 'name' => $name, 'campaigns' => $campaigns, 'campaign' => $campaign, 'type' => 'payments']);
+  }
+
+  public function differenceByCampaign(int $campaign)
+  {
+    $manager = session('manager');
+
+    if (is_null($manager)) {
+      return redirect()->to('/');
+    }
+
+    $result = null;
+    $error = null;
+    $stockID = $this->request->getGet('stock_id') ?? 0;
+
+    $id = $manager['id'];
+    $name = $manager['name'];
+    try {
+      $result = service('ApiHelper')->setParams([
+        'id' => $id,
+        'stock_id' => $stockID,
+        'campaign' => $campaign,
+      ])->setMethod('api/v1/sales/getDifferenceByCampaign')->getResult();
+
+      $campaigns = service('ApiHelper')->setMethod('api/v1/campaign/get')->getResult();
+    } catch (\Exception $e) {
+      $error = $e->getMessage();
+    }
+
+    return view('manager/difference', [
+      'result' => $result,
+      'error' => $error,
+      'name' => $name,
+      'stock_id' => $stockID,
+      'campaigns' => $campaigns,
+      'campaign' => $campaign,
       'type' => 'difference'
     ]);
   }

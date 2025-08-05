@@ -149,7 +149,7 @@ $clients = $result['clients'] ?? [];
   window.addEventListener("DOMContentLoaded", updateSpedizioneTotals);
 
   const apiRequest = async (chat_id, value, type) => {
-    let url = "https://clotiss.site/api/v1/update/count";
+    let url = "<?= getenv('API_URL') ?>/api/v1/update/count";
     const xhr = new XMLHttpRequest();
     const formData = new FormData();
 

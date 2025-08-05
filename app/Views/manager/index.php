@@ -4,6 +4,7 @@ $stocks = $result['stocks'] ?? [];
 $values = $result['values'] ?? [];
 $monthName = $result['month'] ?? "";
 
+// dd($result);
 ?>
 <?= view('styles'); ?>
 <?= view('manager/header') ?>
@@ -11,11 +12,12 @@ $monthName = $result['month'] ?? "";
 
 <div class="table-wrapper">
   <table class="spreadsheet" id="sales">
+    <input type="hidden" id="campaign_id" value="<?= $campaign ?>">
     <tbody>
       <tr class="fixed-row">
         <td colspan="3" class="fixed-col"><?= $monthName ?></td>
-        <td class="fixed-col">Актуальна сумам заказа</td>
         <td class="fixed-col">Заказ по корзине</td>
+        <td class="fixed-col">Актуальная сума заказа</td>
         <td class="fixed-col">Остаток</td>
         <?php foreach ($stocks as $stock): ?>
           <td><?= esc($stock['name']) ?></td>
@@ -31,8 +33,8 @@ $monthName = $result['month'] ?? "";
           <td class="fixed-col"><?= $i + 1 ?></td>
           <td class="fixed-col"><?= esc($row['uniq_id']); ?></td>
           <td class="fixed-col"><?= esc($row['name']) ?></td>
-          <td class="fixed-col"><?= number_format($row['total_order'], 2, '.', '') ?></td>
-          <td class="fixed-col"><?= number_format($row['cart_order'], 2, '.', '') ?></td>
+          <td class="fixed-col"><?= number_format($row['order_sum'], 2, '.', '') ?></td>
+          <td class="fixed-col"><?= number_format($row['actual_sum'], 2, '.', '') ?></td>
           <td class="fixed-col"><?= number_format($row['remaining'], 2, '.', '') ?></td>
 
           <?php foreach ($stocks as $stock): ?>
@@ -413,11 +415,13 @@ $monthName = $result['month'] ?? "";
       const row = form.cellRow.value;
       const col = form.cellCol.value;
       const isNew = form.isNew.value === "true";
+      const campaign_id = document.getElementById('campaign_id').value;
 
       let payload = {
         payment_id: isNew ? null : currentPaymentId,
         chat_id: currentChatId,
-        stock_id: currentStockId
+        stock_id: currentStockId,
+        campaign_id: campaign_id
       };
 
       switch (modalType) {
@@ -451,7 +455,7 @@ $monthName = $result['month'] ?? "";
       };
 
       try {
-        const response = await fetch('https://clotiss.site' + endpointMap[modalType], {
+        const response = await fetch('<?= getenv('API_URL') ?>' + endpointMap[modalType], {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -588,7 +592,7 @@ $monthName = $result['month'] ?? "";
     };
 
     try {
-      const response = await fetch('https://clotiss.site' + endpointMap[type], {
+      const response = await fetch('<?= getenv('API_URL') ?>' + endpointMap[type], {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -610,12 +614,3 @@ $monthName = $result['month'] ?? "";
     }
   }
 </script>
-
-
-<!--
-Залишок повинен відніматися
-Переплата відніматися
-
-Борг повинен додаватися
-Карта повинен додаватися
--->
