@@ -7,7 +7,7 @@ use Exception;
 
 class ApiHelper
 {
-  protected $url = "https://clotpanel.kebeta.agency/";
+  protected $url = "https://clotiss.site/";
   protected $client;
   protected $method;
 

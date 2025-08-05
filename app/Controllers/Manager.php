@@ -56,7 +56,7 @@ class Manager extends BaseController
       $error = $e->getMessage();
     }
 
-    return view('manager/monthly', ['name' => $name, 'error' => $error, 'result' => $result, 'campaigns' => $campaigns, 'campaign' => '', 'type' => 'monthly']);
+    return view('manager/monthly', ['name' => $name, 'error' => $error, 'result' => $result, 'campaigns' => $campaigns, 'campaign' => '', 'type' => 'monthly', 'stock_id' => $stockID]);
   }
 
   public function difference()
