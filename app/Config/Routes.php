@@ -10,6 +10,7 @@ $routes->post('auth', 'Home::auth');
 $routes->post('logout', 'Home::logout');
 
 $routes->group('stock', static function ($routes) {
+  $routes->add('/', 'Stock::ordini');
   $routes->add('ordini', 'Stock::ordini');
   $routes->add('spedizione', 'Stock::spedizione');
 

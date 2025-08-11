@@ -91,16 +91,34 @@ $clients = $result['clients'] ?? [];
     const tbody = document.querySelector("#spedizione_total tbody");
     tbody.querySelectorAll("tr:not(.fixed-row)").forEach(tr => tr.remove());
 
+    let totalKg = 0;
+    let totalColli = 0;
+    let totalSum = 0;
+
     Object.entries(totals).forEach(([country, data]) => {
+      totalKg += data.kg;
+      totalColli += data.colli;
+      totalSum += data.total;
+
       const tr = document.createElement("tr");
       tr.innerHTML = `
-      <td>${country}</td>
-      <td>${data.kg.toFixed(2)}</td>
-      <td>${data.colli}</td>
-      <td>${data.total.toFixed(2)} €</td>
-    `;
+    <td>${country}</td>
+    <td>${data.kg.toFixed(2)}</td>
+    <td>${data.colli}</td>
+    <td>${data.total.toFixed(2)} €</td>
+  `;
       tbody.appendChild(tr);
     });
+
+    // Добавляем строку с общей суммой
+    const totalTr = document.createElement("tr");
+    totalTr.innerHTML = `
+  <td><strong>Totale</strong></td>
+  <td><strong>${totalKg.toFixed(2)}</strong></td>
+  <td><strong>${totalColli}</strong></td>
+  <td><strong>${totalSum.toFixed(2)} €</strong></td>
+`;
+    tbody.appendChild(totalTr);
   }
 
   // Слушаем изменения всех редактируемых ячеек

@@ -19,8 +19,6 @@ $data = $result['data'] ?? [];
 </style>
 
 <body class="table">
-
-
     <?php if (!empty($error)): ?>
         <div class="alert alert-danger"><?= esc($error) ?></div>
     <?php else: ?>
@@ -41,13 +39,20 @@ $data = $result['data'] ?? [];
                                 <td>Сумма</td>
                                 <td>Склад</td>
                             </tr>
+                            <?php $monthTotal = 0; ?>
                             <?php foreach ($monthBlock['items'] as $item): ?>
+                                <?php $monthTotal += $item['price']; ?>
                                 <tr>
                                     <td><?= date('d.m.Y', strtotime($item['date'])) ?></td>
                                     <td><?= number_format($item['price'], 2, '.', ' ') ?></td>
                                     <td><?= esc($item['stock']) ?></td>
                                 </tr>
                             <?php endforeach; ?>
+                            <tr class="total-row">
+                                <td><strong>Totale</strong></td>
+                                <td><strong><?= number_format($monthTotal, 2, '.', ' ') ?></strong></td>
+                                <td></td>
+                            </tr>
                         </tbody>
                     </table>
                 <?php endforeach; ?>
