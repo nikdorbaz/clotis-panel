@@ -276,79 +276,94 @@ $clientsCount = count($clients);
         const searchValue = this.value.trim().toLowerCase();
 
         const table = document.querySelector("#ordini");
+        if (!table) return;
         const rows = Array.from(table.querySelectorAll("tbody tr"));
+        if (!rows.length) return;
 
-        // Первый (нулевой) ряд — заголовки клиентов
+        // Header (нулевая) строка
         const headerRow = rows[0];
-        const headerCells = headerRow.querySelectorAll('td');
+        const headerCells = Array.from(headerRow.querySelectorAll('td, th'));
 
-        // Найдём индекс столбца клиента по заголовку
-        let targetClientColIndex = -1;
+        // 1) Узнаём общее кол-во логических колонок (с учётом colspan)
+        let totalCols = 0;
+        headerCells.forEach(cell => {
+          totalCols += parseInt(cell.getAttribute('colspan') || "1", 10);
+        });
 
-        headerCells.forEach((cell, index) => {
-          const cellText = cell.textContent.trim().toLowerCase();
-          if (cellText.includes(searchValue) && index >= 6) {
-            targetClientColIndex = index;
+        // 2) Разворачиваем заголовочные ячейки в массив текстов длиной totalCols
+        const headerTexts = new Array(totalCols);
+        let ptr = 0;
+        headerCells.forEach(cell => {
+          const span = parseInt(cell.getAttribute('colspan') || "1", 10);
+          const text = cell.textContent.trim().toLowerCase();
+          for (let i = 0; i < span; i++) {
+            headerTexts[ptr++] = text;
           }
         });
 
-        // Если ничего не найдено, показать всё и выйти
-        if (!searchValue || targetClientColIndex === -1) {
-          rows.forEach(row => {
-            row.style.display = '';
-            row.querySelectorAll('td').forEach(cell => {
-              cell.style.display = '';
-            });
-          });
-          return;
+        // 3) Вычисляем видимые логические индексы колонок
+        const visible = new Set();
+        if (!searchValue) {
+          for (let i = 0; i < totalCols; i++) visible.add(i);
+        } else {
+          // всегда показываем фиксированные колонки 0..5 (если они существуют)
+          for (let i = 0; i <= 5 && i < totalCols; i++) visible.add(i);
+          // и те, где в headerTexts есть искомая строка (начиная с логического индекса 6)
+          for (let i = 6; i < totalCols; i++) {
+            if (headerTexts[i] && headerTexts[i].includes(searchValue)) visible.add(i);
+          }
         }
 
+        // 4) Проходим по всем строкам и показываем/скрываем ячейки с учётом colspan
         rows.forEach((row, rowIndex) => {
-          const cells = row.querySelectorAll('td');
+          const cells = Array.from(row.querySelectorAll('td, th'));
+          let colIndex = 0; // текущий логический индекс для ячейки
+          let hasVisibleCellWithData = false;
 
-          // 1. Всегда показываем первые 3 строки (фильтры/заголовки/примечания)
-          if (rowIndex < 3) {
-            row.style.display = '';
-
-            let currentColIndex = 0;
-
-            cells.forEach((cell, cellIndex) => {
-              const span = parseInt(cell.getAttribute("colspan") || "1");
-              // Показываем только нужный столбец клиента и фиксированные столбцы (0-5)
-              if (currentColIndex <= 5 || currentColIndex === targetClientColIndex) {
-                cell.style.display = '';
-              } else {
-                cell.style.display = 'none';
+          cells.forEach(cell => {
+            const span = parseInt(cell.getAttribute('colspan') || "1", 10);
+            // проверяем, есть ли пересечение диапазона [colIndex, colIndex+span-1] с visible
+            let show = false;
+            for (let k = colIndex; k < colIndex + span; k++) {
+              if (visible.has(k)) {
+                show = true;
+                break;
               }
-              currentColIndex += span;
-            });
-            return;
-          }
-
-          // 2. Обработка остальных строк (с данными)
-          if (targetClientColIndex < cells.length) {
-            const clientCell = cells[targetClientColIndex];
-            const clientValue = clientCell.textContent.trim();
-
-            // Если значение пустое — скрываем строку
-            if (!clientValue) {
-              row.style.display = 'none';
-            } else {
-              row.style.display = '';
             }
 
-            // Показываем только нужный столбец клиента и фиксированные (0-5)
-            cells.forEach((cell, cellIndex) => {
-              if (cellIndex <= 5 || cellIndex === targetClientColIndex) {
-                cell.style.display = '';
+            cell.style.display = show ? '' : 'none';
+
+            // для решения, нужно ли скрыть строку — учитываем только видимые ячейки
+            if (show) {
+              // в первых 3 строках держим их всегда видимыми (мы прячем отдельные ячейки, но строка остаётся)
+              if (rowIndex < 3) {
+                hasVisibleCellWithData = true;
               } else {
-                cell.style.display = 'none';
+                if (cell.textContent && cell.textContent.trim() !== '') {
+                  hasVisibleCellWithData = true;
+                }
               }
-            });
+            }
+
+            colIndex += span;
+          });
+
+          // Решаем видимость строки
+          if (rowIndex < 3) {
+            row.style.display = ''; // первые 3 строки всегда показываем (шапка/фильтры/примечания)
+          } else {
+            // если все колонки видимы — показываем все строки
+            if (visible.size === totalCols) {
+              row.style.display = '';
+            } else {
+              row.style.display = hasVisibleCellWithData ? '' : 'none';
+            }
           }
         });
       });
     });
+
+
 
   });
 
