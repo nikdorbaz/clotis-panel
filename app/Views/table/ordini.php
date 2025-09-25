@@ -309,8 +309,9 @@ $clientsCount = count($clients);
           // всегда показываем фиксированные колонки 0..5 (если они существуют)
           for (let i = 0; i <= 5 && i < totalCols; i++) visible.add(i);
           // и те, где в headerTexts есть искомая строка (начиная с логического индекса 6)
+          const regex = new RegExp(`\\b${searchValue}\\b`);
           for (let i = 6; i < totalCols; i++) {
-            if (headerTexts[i] && headerTexts[i].includes(searchValue)) visible.add(i);
+            if (headerTexts[i] && regex.test(headerTexts[i])) visible.add(i);
           }
         }
 
@@ -319,6 +320,7 @@ $clientsCount = count($clients);
           const cells = Array.from(row.querySelectorAll('td, th'));
           let colIndex = 0; // текущий логический индекс для ячейки
           let hasVisibleCellWithData = false;
+          let emptyCellData = false;
 
           cells.forEach(cell => {
             const span = parseInt(cell.getAttribute('colspan') || "1", 10);
@@ -341,10 +343,11 @@ $clientsCount = count($clients);
               } else {
                 if (cell.textContent && cell.textContent.trim() !== '') {
                   hasVisibleCellWithData = true;
+                } else {
+                  emptyCellData = true;
                 }
               }
             }
-
             colIndex += span;
           });
 
@@ -357,13 +360,16 @@ $clientsCount = count($clients);
               row.style.display = '';
             } else {
               row.style.display = hasVisibleCellWithData ? '' : 'none';
+
+              if (emptyCellData) {
+                row.style.display = 'none';
+              }
             }
           }
         });
+
       });
     });
-
-
 
   });
 

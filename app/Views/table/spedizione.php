@@ -4,6 +4,7 @@ $clients = $result['clients'] ?? [];
 
 ?>
 
+<input type="hidden" id="campaign_id" value="<?= $campaign ?? "" ?>">
 <table class="spreadsheet" id="spedizione">
   <thead>
   </thead>
@@ -55,6 +56,8 @@ $clients = $result['clients'] ?? [];
 </style>
 
 <script>
+  const campaign_id = document.getElementById('campaign_id').value;
+
   const parseKgValue = (str) => {
     return str
       .split("+")
@@ -178,7 +181,7 @@ $clients = $result['clients'] ?? [];
     formData.append("value", value);
     formData.append("type", type);
     formData.append('stock_id', "<?= $stock['id'] ?>");
-
+    formData.append('campaign_id', campaign_id);
 
     xhr.send(formData);
   };
